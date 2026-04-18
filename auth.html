@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TransitPulse | Authentication Suite</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#213145",
+                    "inverse-primary": "#adc7ff",
+                    "primary": "#0059bb",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "outline-variant": "#c1c6d7",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-container": "#004964",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#001a41",
+                    "surface": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#004c69",
+                    "secondary-fixed": "#c3e8ff",
+                    "surface-tint": "#005bc0",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary-fixed": "#001e2c",
+                    "secondary": "#00668a",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "primary-fixed-dim": "#adc7ff",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#004493",
+                    "on-surface": "#0b1c30",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "tertiary": "#9e3d00",
+                    "on-primary-container": "#fefcff",
+                    "primary-container": "#0070ea",
+                    "surface-container-low": "#eff4ff",
+                    "secondary-fixed-dim": "#7ad0ff",
+                    "surface-container": "#e5eeff",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#c64f00",
+                    "on-tertiary-container": "#fffbff",
+                    "secondary-container": "#00bdfd",
+                    "on-surface-variant": "#414754",
+                    "outline": "#717786",
+                    "background": "#f8f9ff",
+                    "on-tertiary-fixed": "#351000",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#cbdbf5",
+                    "on-tertiary-fixed-variant": "#7c2e00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #0059bb 0%, #0070ea 100%);
+        }
+        .gradient-button:hover {
+            box-shadow: 0 0 15px rgba(0, 89, 187, 0.3);
+        }
+        .input-error { border: 2px solid #ba1a1a !important; }
+        .input-error-msg { color: #ba1a1a; font-size: 0.75rem; margin-top: 4px; display: none; }
+        .input-error-msg.show { display: block; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+
+        <!-- Left Side: Product Illustration & Brand -->
+        <section class="hidden md:flex flex-1 relative items-center justify-center bg-primary-container p-12 overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute inset-0 z-0 opacity-20">
+                <div class="absolute top-[-10%] left-[-10%] w-96 h-96 rounded-full bg-white blur-3xl"></div>
+                <div class="absolute bottom-[-5%] right-[-5%] w-[32rem] h-[32rem] rounded-full bg-secondary blur-3xl"></div>
+            </div>
+            <div class="relative z-10 max-w-lg">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-lg">
+                        <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">directions_bus</span>
+                    </div>
+                    <span class="text-3xl font-black tracking-tighter text-white">TransitPulse</span>
+                </div>
+                <h1 class="text-5xl font-extrabold text-white tracking-tight leading-tight mb-6">
+                    Precision Pulse <br/>Tracking for the <br/>Modern Campus.
+                </h1>
+                <p class="text-primary-fixed text-lg font-medium max-w-md mb-12 leading-relaxed opacity-90">
+                    Real-time resilient transport logistics with fintech-grade accuracy. Join the network of 50+ campuses across the nation.
+                </p>
+                <!-- Product Preview Card (Bento Style) -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-primary-fixed font-bold block mb-1">Live Status</span>
+                            <h3 class="text-white font-bold text-xl">East Loop Shuttle</h3>
+                        </div>
+                        <div class="px-3 py-1 bg-white/20 rounded-full">
+                            <span class="text-white text-xs font-semibold">Active Now</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-2 h-2 rounded-full bg-white"></div>
+                            <div class="h-[2px] flex-1 bg-white/20"></div>
+                            <div class="w-2 h-2 rounded-full bg-white/40"></div>
+                        </div>
+                        <div class="flex justify-between text-white/60 text-xs font-medium">
+                            <span>Main Library</span>
+                            <span>Student Union</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Absolute Map Background Image Overlay -->
+            <img alt="Abstract map overlay" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ-XP4FQVTqcM_EMiOBfEhiw2QmLo_oasOnf2teJ4aEWNDIWJDPGz3yDWzdlxVPJ5atA_EYQEJ6jsFb5OiKLHR-Z-xsKC0mnyQsaYHilNSevy2rFT3NjWf2GrCKu84nAMWiL_p5RKh_q_d-W4DBhXS-0TIMdEZyeta-q9zaqtfnvbfrSv5EelKZ3agUPuu5qg8R-wSLVfCMfQ3ruXdElddWFCVK18BxGB1DGk7mbLihugH4c6IoS5tZJ4nHPkyxGAdoYsQlkHRKmA"/>
+        </section>
+
+        <!-- Right Side: Auth Container -->
+        <section class="flex-1 flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+            <div class="w-full max-w-md space-y-10">
+                <!-- Tab Switching / Context Head -->
+                <div class="space-y-2">
+                    <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Welcome back</h2>
+                    <p class="text-on-surface-variant font-medium">Enter your credentials to access the pulse dashboard.</p>
+                </div>
+
+                <!-- Auth Forms Grid -->
+                <div class="space-y-6" id="auth-forms">
+                    <!-- Login Form -->
+                    <form class="space-y-5" id="login-form" onsubmit="handleLogin(event)">
+                        <div class="space-y-1.5">
+                            <label class="text-sm font-semibold text-on-surface-variant ml-1" for="email">Email Address</label>
+                            <div class="relative">
+                                <input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all text-on-surface font-medium placeholder:text-outline" id="email" placeholder="name@college.edu" type="email"/>
+                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
+                            </div>
+                            <p class="input-error-msg" id="email-error">Please enter a valid email address.</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center px-1">
+                                <label class="text-sm font-semibold text-on-surface-variant" for="password">Password</label>
+                                <a class="text-xs font-bold text-primary hover:underline underline-offset-4" href="#" onclick="showToast('Reset link sent to your email.')">Forgot password?</a>
+                            </div>
+                            <div class="relative">
+                                <input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all text-on-surface font-medium placeholder:text-outline" id="password" placeholder="••••••••" type="password"/>
+                                <button type="button" onclick="togglePassword()" class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl cursor-pointer" id="pw-toggle">lock</button>
+                            </div>
+                            <p class="input-error-msg" id="password-error">Password must be at least 6 characters.</p>
+                        </div>
+                        <div class="flex items-center gap-2 px-1">
+                            <input class="w-5 h-5 rounded-lg border-outline-variant text-primary focus:ring-primary/20 transition-all" id="remember" type="checkbox"/>
+                            <label class="text-sm font-medium text-on-surface-variant cursor-pointer" for="remember">Remember me for 30 days</label>
+                        </div>
+                        <button class="w-full py-4 gradient-button text-white font-bold rounded-full text-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/10" type="submit" id="login-btn">
+                            Sign in
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="relative flex items-center py-2">
+                        <div class="flex-grow border-t border-surface-container-high"></div>
+                        <span class="flex-shrink mx-4 text-outline-variant text-xs font-bold uppercase tracking-widest">or continue with</span>
+                        <div class="flex-grow border-t border-surface-container-high"></div>
+                    </div>
+
+                    <!-- Social / Alt Login -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="flex items-center justify-center gap-2 py-3.5 bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-2xl font-bold text-on-surface-variant text-sm">
+                            <img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlvGrwtevOQtJUAxMiCWcKa9O9wccZuH5fI8dJT3OCKDAZltY0H7ccPsDAF3Fhy8SeqMzSlmw1y0GKVcVCEcBiGU3F4tYJFT7Tobhqa0LPkDtZMzStTpHqSZxLIpDqsLPF4be2jNk_P7tk1azZ9ZTyg58SCe6F5sbBWHLCwVrmYlhGeQ5sHTpDJNrpQ8RjLFbmJHfF6UJuZg5gGZV1Lhko8HdNxPjqy8FCu59h66f-cw_sr-gRIBXAKJ7hJLas0wKPAZRQfWm-Ctw"/>
+                            Google
+                        </button>
+                        <button class="flex items-center justify-center gap-2 py-3.5 bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-2xl font-bold text-on-surface-variant text-sm">
+                            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">terminal</span>
+                            SSO
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sign Up Footer -->
+                <p class="text-center text-on-surface-variant font-medium">
+                    New to TransitPulse? 
+                    <a class="text-primary font-bold hover:underline underline-offset-4" href="#" onclick="showToast('Registration coming soon!')">Create Account</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Mockup: OTP Verification (Hidden by default) -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-on-surface/20 backdrop-blur-sm hidden" id="otp-modal">
+        <div class="glass-card w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative">
+            <button class="absolute top-6 right-6 text-outline hover:text-on-surface">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div class="space-y-8 text-center">
+                <div class="w-16 h-16 bg-primary-fixed rounded-3xl flex items-center justify-center mx-auto">
+                    <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-extrabold tracking-tight">Verify Identity</h2>
+                    <p class="text-on-surface-variant text-sm px-4">We've sent a 6-digit code to <span class="text-on-surface font-bold">alex@campus.edu</span></p>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text" value="8"/>
+                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text" value="2"/>
+                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text" value="0"/>
+                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text"/>
+                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text"/>
+                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text"/>
+                </div>
+                <div class="space-y-4">
+                    <button class="w-full py-4 gradient-button text-white font-bold rounded-full transition-all shadow-lg">Verify</button>
+                    <button class="text-sm font-bold text-outline hover:text-primary transition-colors">Resend Code (45s)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Component Preview Footer (Toast) -->
+    <footer class="fixed bottom-6 right-6 flex flex-col gap-3 pointer-events-none md:pointer-events-auto">
+        <div class="bg-white rounded-2xl p-4 shadow-xl flex items-center gap-4 border border-outline-variant/10 max-w-xs transition-all duration-500 opacity-0 translate-y-4" id="toast">
+            <div class="w-8 h-8 bg-primary-fixed rounded-full flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary text-lg" id="toast-icon">check</span>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-on-surface" id="toast-title">Success</p>
+                <p class="text-[10px] text-on-surface-variant" id="toast-msg">Action completed.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function showToast(msg, title = 'Info', icon = 'info') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-msg').textContent = msg;
+            document.getElementById('toast-icon').textContent = icon;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        function togglePassword() {
+            const pw = document.getElementById('password');
+            const btn = document.getElementById('pw-toggle');
+            if (pw.type === 'password') {
+                pw.type = 'text';
+                btn.textContent = 'lock_open';
+            } else {
+                pw.type = 'password';
+                btn.textContent = 'lock';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            const emailErr = document.getElementById('email-error');
+            const pwErr = document.getElementById('password-error');
+            let valid = true;
+
+            // Reset
+            email.classList.remove('input-error');
+            password.classList.remove('input-error');
+            emailErr.classList.remove('show');
+            pwErr.classList.remove('show');
+
+            if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                email.classList.add('input-error');
+                emailErr.classList.add('show');
+                valid = false;
+            }
+            if (!password.value || password.value.length < 6) {
+                password.classList.add('input-error');
+                pwErr.classList.add('show');
+                valid = false;
+            }
+            if (!valid) return;
+
+            const btn = document.getElementById('login-btn');
+            btn.textContent = 'Verifying...';
+            btn.disabled = true;
+
+            // Simulate auth → show OTP modal
+            setTimeout(() => {
+                btn.textContent = 'Sign in';
+                btn.disabled = false;
+                document.getElementById('otp-modal').classList.remove('hidden');
+            }, 1200);
+        }
+
+        // OTP auto-advance
+        document.querySelectorAll('#otp-modal input[type="text"]').forEach((input, i, inputs) => {
+            input.addEventListener('input', () => {
+                if (input.value.length === 1 && i < inputs.length - 1) inputs[i + 1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && i > 0) inputs[i - 1].focus();
+            });
+        });
+
+        // OTP verify button
+        document.querySelector('#otp-modal button.w-full').addEventListener('click', () => {
+            const inputs = document.querySelectorAll('#otp-modal input[type="text"]');
+            const code = Array.from(inputs).map(i => i.value).join('');
+            if (code.length === 6) {
+                document.getElementById('otp-modal').classList.add('hidden');
+                showToast('Login successful! Redirecting...', 'Welcome back', 'check_circle');
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+            } else {
+                showToast('Enter all 6 digits.', 'Incomplete Code', 'error');
+            }
+        });
+
+        // Close OTP modal
+        document.querySelector('#otp-modal button.absolute').addEventListener('click', () => {
+            document.getElementById('otp-modal').classList.add('hidden');
+        });
+    </script>
+
+</body>
+</html>
