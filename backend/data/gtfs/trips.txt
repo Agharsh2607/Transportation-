@@ -1,0 +1,7 @@
+route_id,service_id,trip_id,trip_headsign,trip_short_name,direction_id,block_id,shape_id,wheelchair_accessible,bikes_allowed
+DL1,WD,T1,Connaught Place,1,0,B1,S1,1,0
+DL1,WD,T2,Gurgaon,1,1,B1,S1,1,0
+DL2,WD,T3,Chandni Chowk,2,0,B2,S2,1,0
+DL2,WD,T4,Dwarka,2,1,B2,S2,1,0
+DL3,WD,T5,Noida City Center,3,0,B3,S3,1,0
+DL3,WD,T6,Karol Bagh,3,1,B3,S3,1,0

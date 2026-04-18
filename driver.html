@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver GPS Tracker - TransitPulse</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e6ed;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .status-box {
+      background: #f8f9fb;
+      border: 2px solid #e0e6ed;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-label {
+      color: #7f8c8d;
+      font-weight: 500;
+    }
+
+    .status-value {
+      color: #2c3e50;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .indicator-live {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .indicator-waiting {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .indicator-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .dot-live {
+      background: #28a745;
+    }
+
+    .dot-waiting {
+      background: #ffc107;
+    }
+
+    .dot-error {
+      background: #dc3545;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #e0e6ed;
+      color: #2c3e50;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #d0d8e8;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1565c0;
+      margin-top: 20px;
+    }
+
+    .error-message {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #c62828;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: #f8f9fb;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #7f8c8d;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚌 Driver GPS Tracker</h1>
+      <p>Real-time location sharing for TransitPulse</p>
+    </div>
+
+    <form id="driverForm">
+      <div class="form-group">
+        <label for="vehicleId">Vehicle ID</label>
+        <input
+          type="text"
+          id="vehicleId"
+          placeholder="e.g., BUS-001"
+          required
+          value="BUS-001"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="routeId">Route ID</label>
+        <select id="routeId" required>
+          <option value="">Select a route...</option>
+          <option value="ROUTE_1">Route 1 - Downtown Express</option>
+          <option value="ROUTE_2">Route 2 - Airport Shuttle</option>
+          <option value="ROUTE_3">Route 3 - Campus Loop</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="driverName">Driver Name</label>
+        <input
+          type="text"
+          id="driverName"
+          placeholder="Your name"
+          required
+          value="Driver 1"
+        />
+      </div>
+
+      <div class="status-box">
+        <div class="status-item">
+          <span class="status-label">GPS Status</span>
+          <span class="status-indicator indicator-waiting">
+            <span class="dot dot-waiting"></span>
+            Waiting
+          </span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Location</span>
+          <span class="status-value" id="locationStatus">Not available</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Accuracy</span>
+          <span class="status-value" id="accuracyStatus">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Speed</span>
+          <span class="status-value" id="speedStatus">0 m/s</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Updates Sent</span>
+          <span class="status-value" id="updateCount">0</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="latValue">--</div>
+          <div class="stat-label">Latitude</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="lngValue">--</div>
+          <div class="stat-label">Longitude</div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn-primary" id="startBtn" onclick="startTracking()">
+          Start Tracking
+        </button>
+        <button type="button" class="btn-secondary" id="stopBtn" onclick="stopTracking()" disabled>
+          Stop
+        </button>
+      </div>
+
+      <div class="error-message" id="errorMessage"></div>
+      <div class="info-box">
+        ℹ️ Enable location services on your device. Updates are sent every 3-5 seconds.
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    let watchId = null;
+    let isTracking = false;
+    let updateCount = 0;
+    let lastUpdateTime = 0;
+
+    async function startTracking() {
+      const vehicleId = document.getElementById('vehicleId').value;
+      const routeId = document.getElementById('routeId').value;
+      const driverName = document.getElementById('driverName').value;
+
+      if (!vehicleId || !routeId || !driverName) {
+        showError('Please fill in all fields');
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        showError('Geolocation is not supported by your browser');
+        return;
+      }
+
+      isTracking = true;
+      updateCount = 0;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      updateStatusIndicator('live');
+
+      // Request high accuracy
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude, accuracy, speed } = position.coords;
+          const timestamp = Date.now();
+
+          // Update UI
+          document.getElementById('locationStatus').textContent = 
+            `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          document.getElementById('accuracyStatus').textContent = 
+            `±${accuracy.toFixed(0)}m`;
+          document.getElementById('speedStatus').textContent = 
+            `${(speed || 0).toFixed(1)} m/s`;
+          document.getElementById('latValue').textContent = latitude.toFixed(6);
+          document.getElementById('lngValue').textContent = longitude.toFixed(6);
+
+          // Send to backend
+          sendGPSUpdate({
+            vehicle_id: vehicleId,
+            route_id: routeId,
+            driver_name: driverName,
+            latitude,
+            longitude,
+            speed: speed || 0,
+            accuracy,
+            timestamp,
+          });
+
+          updateCount++;
+          document.getElementById('updateCount').textContent = updateCount;
+        },
+        (error) => {
+          showError(`GPS Error: ${error.message}`);
+          updateStatusIndicator('error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    }
+
+    function stopTracking() {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+
+      isTracking = false;
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      updateStatusIndicator('waiting');
+      document.getElementById('locationStatus').textContent = 'Not available';
+      document.getElementById('accuracyStatus').textContent = '--';
+      document.getElementById('speedStatus').textContent = '0 m/s';
+    }
+
+    async function sendGPSUpdate(data) {
+      try {
+        const response = await fetch(`${API_BASE}/ingest/gps`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        lastUpdateTime = Date.now();
+        clearError();
+      } catch (error) {
+        console.error('Failed to send GPS update:', error);
+        showError(`Failed to send update: ${error.message}`);
+      }
+    }
+
+    function updateStatusIndicator(status) {
+      const indicator = document.querySelector('.status-indicator');
+      const dot = document.querySelector('.dot');
+
+      indicator.className = 'status-indicator';
+      dot.className = 'dot';
+
+      if (status === 'live') {
+        indicator.classList.add('indicator-live');
+        indicator.innerHTML = '<span class="dot dot-live"></span>Live';
+        dot.classList.add('dot-live');
+      } else if (status === 'waiting') {
+        indicator.classList.add('indicator-waiting');
+        indicator.innerHTML = '<span class="dot dot-waiting"></span>Waiting';
+        dot.classList.add('dot-waiting');
+      } else if (status === 'error') {
+        indicator.classList.add('indicator-error');
+        indicator.innerHTML = '<span class="dot dot-error"></span>Error';
+        dot.classList.add('dot-error');
+      }
+    }
+
+    function showError(message) {
+      const errorBox = document.getElementById('errorMessage');
+      errorBox.textContent = message;
+      errorBox.classList.add('show');
+    }
+
+    function clearError() {
+      const errorBox = document.getElementById('errorMessage');
+      errorBox.classList.remove('show');
+    }
+
+    // Set default route
+    document.getElementById('routeId').value = 'ROUTE_1';
+  </script>
+</body>
+</html>

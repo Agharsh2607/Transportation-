@@ -64,4 +64,46 @@ async function findNearby(lat, lng, radiusKm) {
   }
 }
 
-module.exports = { findAll, findById, findNearby };
+/**
+ * Insert a new stop (for GTFS loading)
+ * @param {object} stopData
+ */
+async function insert(stopData) {
+  try {
+    const {
+      stop_id,
+      stop_name,
+      latitude,
+      longitude,
+      stop_code,
+      wheelchair_boarding,
+    } = stopData;
+
+    const result = await query(
+      `INSERT INTO stops (id, name, lat, lng, code, wheelchair_boarding)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (id) DO UPDATE SET
+         name = $2,
+         lat = $3,
+         lng = $4,
+         code = $5,
+         wheelchair_boarding = $6
+       RETURNING *`,
+      [
+        stop_id,
+        stop_name,
+        latitude,
+        longitude,
+        stop_code,
+        wheelchair_boarding,
+      ]
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    logger.error('stop.model.insert error', { message: err.message });
+    throw err;
+  }
+}
+
+module.exports = { findAll, findById, findNearby, insert };

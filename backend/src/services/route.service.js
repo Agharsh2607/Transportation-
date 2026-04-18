@@ -1,16 +1,23 @@
 const routeModel = require('../models/route.model');
 const cacheService = require('./cache.service');
 const logger = require('../utils/logger');
+const predefinedRoutes = require('../data/routes.data');
 
 /**
- * Get all active routes.
+ * Get all active routes (from DB or predefined data).
  */
 async function getAllRoutes() {
   try {
-    return await routeModel.findAll();
+    // Try to get from database first
+    const dbRoutes = await routeModel.findAll();
+    if (dbRoutes && dbRoutes.length > 0) {
+      return dbRoutes;
+    }
+    // Fall back to predefined routes
+    return predefinedRoutes;
   } catch (err) {
-    logger.error('route.service.getAllRoutes error', { message: err.message });
-    throw err;
+    logger.warn('route.service.getAllRoutes DB error, using predefined routes', { message: err.message });
+    return predefinedRoutes;
   }
 }
 
@@ -20,11 +27,22 @@ async function getAllRoutes() {
  */
 async function getRouteById(id) {
   try {
-    return await routeModel.findById(id);
+    // Try database first
+    const dbRoute = await routeModel.findById(id);
+    if (dbRoute) {
+      return dbRoute;
+    }
   } catch (err) {
-    logger.error('route.service.getRouteById error', { id, message: err.message });
-    throw err;
+    logger.warn('route.service.getRouteById DB error', { id, message: err.message });
   }
+
+  // Fall back to predefined routes
+  const predefinedRoute = predefinedRoutes.find((r) => r.id === id);
+  if (predefinedRoute) {
+    return predefinedRoute;
+  }
+
+  throw new Error(`Route ${id} not found`);
 }
 
 /**

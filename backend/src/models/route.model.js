@@ -60,4 +60,49 @@ async function getStopsForRoute(routeId) {
   }
 }
 
-module.exports = { findAll, findById, getStopsForRoute };
+/**
+ * Insert a new route (for GTFS loading)
+ * @param {object} routeData
+ */
+async function insert(routeData) {
+  try {
+    const {
+      route_id,
+      route_name,
+      route_short_name,
+      agency_id,
+      polyline,
+      route_color,
+      route_type,
+    } = routeData;
+
+    const result = await query(
+      `INSERT INTO routes (id, name, short_name, agency_id, polyline, color, route_type, active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+       ON CONFLICT (id) DO UPDATE SET
+         name = $2,
+         short_name = $3,
+         agency_id = $4,
+         polyline = $5,
+         color = $6,
+         route_type = $7
+       RETURNING *`,
+      [
+        route_id,
+        route_name,
+        route_short_name,
+        agency_id,
+        JSON.stringify(polyline),
+        route_color,
+        route_type,
+      ]
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    logger.error('route.model.insert error', { message: err.message });
+    throw err;
+  }
+}
+
+module.exports = { findAll, findById, getStopsForRoute, insert };

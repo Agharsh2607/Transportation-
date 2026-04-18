@@ -96,12 +96,48 @@
             border-radius: 50%;
             cursor: pointer;
         }
+        
+        .navbar-link {
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          color: #7f8c8d;
+          transition: color 0.2s ease;
+        }
+        
+        .navbar-link:hover {
+          color: #0059bb;
+        }
+        
+        .navbar-link.active {
+          color: #0059bb;
+          font-weight: 600;
+          border-bottom: 2px solid #0059bb;
+        }
     </style>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased">
 
-    <!-- SideNavBar Shell -->
-    <nav class="h-screen w-64 fixed left-0 top-0 bg-slate-50 flex flex-col p-4 gap-2 z-50">
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm">
+        <div class="flex justify-between items-center px-8 py-3 max-w-full">
+            <div class="flex items-center gap-8">
+                <span class="text-xl font-black tracking-tighter text-primary">TransitPulse</span>
+                <nav class="hidden md:flex gap-6 items-center">
+                    <a class="navbar-link" href="index.html">Home</a>
+                    <a class="navbar-link" href="dashboard.html">Dashboard</a>
+                    <a class="navbar-link" href="live-map.html">Live Map</a>
+                    <a class="navbar-link" href="vehicle-detail.html">Vehicles</a>
+                    <a class="navbar-link" href="admin.html" id="admin-nav-link" style="display: none;">Admin</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="dashboard.html" class="text-slate-400 font-medium hover:text-blue-600 transition-all duration-200">Back to Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main style="margin-top: 60px;">
         <div class="flex flex-col mb-8 px-2">
             <span class="text-lg font-bold text-blue-900">TransitPulse</span>
             <span class="text-xs font-medium text-slate-500">Precision Pulse v2.4</span>
@@ -370,6 +406,80 @@
     </main>
 
     <script>
+        // ── Admin Authentication Check ──────────────────────────────────────
+
+        async function checkAdminAuth() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/check-auth', {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    // Not authenticated, redirect to login
+                    window.location.href = 'auth.html?admin=true&redirect=' + encodeURIComponent(window.location.href);
+                    return false;
+                }
+
+                const data = await response.json();
+                if (data.success && data.authenticated) {
+                    // Update UI with admin info
+                    updateAdminUI(data.user);
+                    return true;
+                } else {
+                    window.location.href = 'auth.html?admin=true&redirect=' + encodeURIComponent(window.location.href);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = 'auth.html?admin=true&redirect=' + encodeURIComponent(window.location.href);
+                return false;
+            }
+        }
+
+        function updateAdminUI(user) {
+            // Update admin profile in header
+            const profileImg = document.querySelector('img[alt="Administrator Profile"]');
+            if (profileImg) {
+                profileImg.alt = user.name + ' Profile';
+            }
+
+            // Add admin info to header
+            const headerDiv = document.querySelector('header .flex.items-center.gap-4:last-child');
+            if (headerDiv && !document.getElementById('admin-info')) {
+                const adminInfo = document.createElement('div');
+                adminInfo.id = 'admin-info';
+                adminInfo.className = 'flex items-center gap-2 text-sm';
+                adminInfo.innerHTML = `
+                    <span class="text-slate-600">Welcome, ${user.name}</span>
+                    <button onclick="logoutAdmin()" class="text-red-600 hover:text-red-800 font-medium">Logout</button>
+                `;
+                headerDiv.insertBefore(adminInfo, headerDiv.lastElementChild);
+            }
+        }
+
+        async function logoutAdmin() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Redirect to login regardless of response
+                window.location.href = 'auth.html?admin=true&message=logged_out';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                // Still redirect to login
+                window.location.href = 'auth.html?admin=true&message=logged_out';
+            }
+        }
+
         // ── Admin Network Simulation Controls ──────────────────────────────────
 
         let currentMode = 'normal';
@@ -449,6 +559,73 @@
         }
 
         function setTopology(mode) {
+            currentMode = mode;
+            if (mode === 'normal') bufferCount = 0;
+
+            // Update button styles
+            document.querySelectorAll('.topo-btn').forEach(btn => {
+                if (btn.dataset.mode === mode) {
+                    btn.className = 'topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-primary bg-surface-container-low text-primary transition-all';
+                } else {
+                    btn.className = 'topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-surface-container-low text-on-surface-variant hover:border-outline-variant transition-all';
+                }
+            });
+
+            // Log the change
+            const msgs = { normal: 'Network topology set to NORMAL.', slow: `Network topology set to SLOW (${latency}ms latency).`, offline: 'Network topology set to OFFLINE — buffer mode engaged.' };
+            addLog(`[${timestamp()}] <span class="text-primary-fixed-dim">SYS</span> <span class="text-yellow-300">${msgs[mode]}</span>`);
+            updateStateIndicators();
+        }
+
+        function updateLatency(val) {
+            latency = parseInt(val);
+            document.getElementById('latency-display').textContent = latency + 'ms';
+            if (currentMode === 'slow') {
+                addLog(`[${timestamp()}] <span class="text-tertiary-fixed-dim">WARN</span> <span class="text-slate-200 italic">Latency target updated to ${latency}ms.</span>`);
+            }
+        }
+
+        // Terminal input
+        document.addEventListener('DOMContentLoaded', function() {
+            const terminalInput = document.querySelector('#terminal-log').closest('section').querySelector('input');
+            if (terminalInput) {
+                terminalInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && this.value.trim()) {
+                        addLog(`[${timestamp()}] <span class="text-green-400">CMD</span> <span class="text-slate-300">${this.value}</span>`);
+                        setTimeout(() => {
+                            addLog(`[${timestamp()}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">Command acknowledged. Processing...</span>`);
+                        }, 400);
+                        this.value = '';
+                    }
+                });
+            }
+        });
+
+        // Initialize admin page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication first
+            const isAuthenticated = await checkAdminAuth();
+            
+            if (isAuthenticated) {
+                // Start simulation only if authenticated
+                // Periodic log streaming
+                setInterval(() => {
+                    const templates = logTemplates[currentMode] || logTemplates.normal;
+                    const tpl = templates[Math.floor(Math.random() * templates.length)];
+                    addLog(tpl(timestamp()));
+                    updateStateIndicators();
+                    updateUptime();
+                }, 1500);
+
+                // Seed initial logs
+                ['System heartbeat initialized on node cluster-7.',
+                 'Handshake protocol established with 142 vehicles.',
+                 'GPS drift compensation active on all modules.'].forEach((msg, i) => {
+                    setTimeout(() => addLog(`[${timestamp()}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">${msg}</span>`), i * 200);
+                });
+            }
+        });
+    </script>  function setTopology(mode) {
             currentMode = mode;
             if (mode === 'normal') bufferCount = 0;
 

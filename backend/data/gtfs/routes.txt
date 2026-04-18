@@ -1,0 +1,4 @@
+route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color
+DL1,DTC,1,Delhi Route 1,Main route through central Delhi,3,https://dtc.delhi.gov.in,667eea,ffffff
+DL2,DTC,2,Delhi Route 2,Route through south Delhi,3,https://dtc.delhi.gov.in,667eea,ffffff
+DL3,DTC,3,Delhi Route 3,Route through north Delhi,3,https://dtc.delhi.gov.in,667eea,ffffff

@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const apiRouter = require('./api/routes/index');
 const requestLogger = require('./middleware/requestLogger.middleware');
 const { vehicleRateLimit } = require('./middleware/rateLimit.middleware');
@@ -13,10 +14,16 @@ const app = express();
 app.use(helmet());
 
 // CORS — allow all origins for hackathon; restrict in production
-app.use(cors());
+app.use(cors({
+  credentials: true, // Allow cookies
+  origin: true // Allow all origins for development
+}));
 
 // Parse JSON bodies up to 1MB
 app.use(express.json({ limit: '1mb' }));
+
+// Parse cookies
+app.use(cookieParser());
 
 // Request logging
 app.use(requestLogger);

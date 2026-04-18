@@ -9,6 +9,13 @@ const positionService = require('./services/position.service');
 const { redisCache, redisPubSub } = require('./config/redis.config');
 const { pool } = require('./config/db.config');
 const { PORT } = require('./config/env');
+const GPSSimulator = require('./services/gps.simulator');
+const ingestService = require('./services/ingest.service');
+const vehicleService = require('./services/vehicle.service');
+const routeService = require('./services/route.service');
+const createSimulationRoutes = require('./api/routes/simulation.routes');
+const gtfsLoader = require('./services/gtfs.loader');
+const IndiaBusSimulator = require('./services/india.bus.simulator');
 
 // Create HTTP server from Express app
 const server = http.createServer(app);
@@ -16,12 +23,50 @@ const server = http.createServer(app);
 // Attach WebSocket server to the same HTTP server
 const wss = createWSServer(server);
 
+// Initialize GPS Simulator
+const gpsSimulator = new GPSSimulator(ingestService);
+
+// Add simulation routes to the app
+const simulationRoutes = createSimulationRoutes(gpsSimulator, vehicleService, routeService);
+app.use('/api', simulationRoutes);
+
 // Start the queue consumer — processes GPS packets every 500ms
 queueService.startConsumer(async (packets) => {
   for (const packet of packets) {
     await positionService.processPacket(packet);
   }
 });
+
+// Start GPS simulator
+gpsSimulator.start();
+
+// Initialize GTFS loading (optional, for real Indian bus data)
+async function initializeGTFS() {
+  try {
+    const gtfsPath = process.env.GTFS_PATH || './data/gtfs';
+    const result = await gtfsLoader.loadGTFS(gtfsPath);
+    logger.info('GTFS loaded successfully', result);
+
+    // Start simulator for each route
+    const routes = await routeService.getAllRoutes();
+    const indiaBusSimulator = new IndiaBusSimulator(ingestService);
+    
+    routes.forEach(route => {
+      indiaBusSimulator.startRouteSimulation(route.route_id, route);
+    });
+    
+    indiaBusSimulator.start();
+    logger.info('India bus simulator started with GTFS routes');
+  } catch (err) {
+    logger.warn('GTFS load failed, using predefined routes', { error: err.message });
+    // Continue with predefined routes
+  }
+}
+
+// Call GTFS initialization after a short delay to allow database to be ready
+setTimeout(() => {
+  initializeGTFS();
+}, 2000);
 
 // Start listening
 server.listen(PORT, () => {

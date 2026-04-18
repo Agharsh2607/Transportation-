@@ -56,4 +56,27 @@ async function processIngest(packets) {
   return { accepted, skipped };
 }
 
-module.exports = { processIngest };
+/**
+ * Ingest a single GPS packet (used by GPS simulator)
+ * @param {object} packet - GPS packet with vehicle_id, latitude, longitude, etc.
+ */
+async function ingestGPSPacket(packet) {
+  try {
+    if (!packet.vehicle_id) {
+      logger.warn('GPS packet missing vehicle_id');
+      return;
+    }
+
+    // Add sequence number if not present
+    if (!packet.seq) {
+      packet.seq = Date.now();
+    }
+
+    // Enqueue for processing
+    queueService.enqueuePacket(packet);
+  } catch (err) {
+    logger.error('ingest.service.ingestGPSPacket error', { message: err.message });
+  }
+}
+
+module.exports = { processIngest, ingestGPSPacket };

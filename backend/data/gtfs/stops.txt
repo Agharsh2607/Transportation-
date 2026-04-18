@@ -1,0 +1,16 @@
+stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,location_type,parent_station,stop_timezone,wheelchair_boarding
+S1,1001,Connaught Place,Central Delhi,28.6328,77.1896,,https://dtc.delhi.gov.in,0,,,1
+S2,1002,New Delhi Railway Station,Railway Station,28.6431,77.2197,,https://dtc.delhi.gov.in,0,,,1
+S3,1003,Delhi Gate,South Delhi,28.6355,77.2308,,https://dtc.delhi.gov.in,0,,,1
+S4,1004,Kasturba Nagar,East Delhi,28.5921,77.2500,,https://dtc.delhi.gov.in,0,,,1
+S5,1005,Lajpat Nagar,South Delhi,28.5671,77.2500,,https://dtc.delhi.gov.in,0,,,1
+S6,1006,Safdarjung,West Delhi,28.5671,77.1896,,https://dtc.delhi.gov.in,0,,,1
+S7,1007,Rajiv Chowk,Central Delhi,28.6328,77.2197,,https://dtc.delhi.gov.in,0,,,1
+S8,1008,Chandni Chowk,Old Delhi,28.6505,77.2303,,https://dtc.delhi.gov.in,0,,,1
+S9,1009,Red Fort,Old Delhi,28.6562,77.2410,,https://dtc.delhi.gov.in,0,,,1
+S10,1010,Jama Masjid,Old Delhi,28.6505,77.2410,,https://dtc.delhi.gov.in,0,,,1
+S11,1011,Karol Bagh,West Delhi,28.6431,77.1896,,https://dtc.delhi.gov.in,0,,,1
+S12,1012,Patel Nagar,West Delhi,28.6328,77.1896,,https://dtc.delhi.gov.in,0,,,1
+S13,1013,Dwarka,South Delhi,28.5921,77.0500,,https://dtc.delhi.gov.in,0,,,1
+S14,1014,Noida City Center,Noida,28.5921,77.3500,,https://dtc.delhi.gov.in,0,,,1
+S15,1015,Gurgaon,Gurgaon,28.4595,77.0266,,https://dtc.delhi.gov.in,0,,,1

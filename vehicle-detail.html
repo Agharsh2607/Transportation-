@@ -82,12 +82,48 @@
         .glass-panel { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .ambient-shadow { box-shadow: 0 24px 48px -12px rgba(11, 28, 48, 0.06); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .navbar-link {
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          color: #7f8c8d;
+          transition: color 0.2s ease;
+        }
+        
+        .navbar-link:hover {
+          color: #0059bb;
+        }
+        
+        .navbar-link.active {
+          color: #0059bb;
+          font-weight: 600;
+          border-bottom: 2px solid #0059bb;
+        }
     </style>
 </head>
 <body class="text-on-background antialiased">
 
-    <!-- SideNavBar Shell -->
-    <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col p-4 gap-2 z-30">
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm">
+        <div class="flex justify-between items-center px-8 py-3 max-w-full">
+            <div class="flex items-center gap-8">
+                <span class="text-xl font-black tracking-tighter text-primary">TransitPulse</span>
+                <nav class="hidden md:flex gap-6 items-center">
+                    <a class="navbar-link" href="index.html">Home</a>
+                    <a class="navbar-link" href="dashboard.html">Dashboard</a>
+                    <a class="navbar-link" href="live-map.html">Live Map</a>
+                    <a class="navbar-link active" href="vehicle-detail.html">Vehicles</a>
+                    <a class="navbar-link" href="admin.html" id="admin-nav-link" style="display: none;">Admin</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="dashboard.html" class="text-slate-400 font-medium hover:text-blue-600 transition-all duration-200">Back to Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main style="margin-top: 60px;">
         <div class="mb-8 px-2">
             <h1 class="text-lg font-bold text-blue-900 dark:text-blue-100">TransitPulse</h1>
             <p class="text-xs text-slate-400 font-medium">Precision Pulse v2.4</p>
@@ -437,6 +473,38 @@
 
         // Start
         setNetworkState('good');
+    </script>
+
+    <script>
+        // Check if user has admin access and show admin link
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/check-auth', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.authenticated) {
+                        // Show admin link
+                        const adminLink = document.getElementById('admin-nav-link');
+                        if (adminLink) {
+                            adminLink.style.display = 'inline';
+                        }
+                    }
+                }
+            } catch (error) {
+                // Silently fail - admin link stays hidden
+                console.debug('Admin access check failed:', error);
+            }
+        }
+
+        // Check admin access on page load
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
     </script>
 
 </body>

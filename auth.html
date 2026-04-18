@@ -98,7 +98,24 @@
 </head>
 <body class="bg-surface text-on-surface min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
 
-        <!-- Left Side: Product Illustration & Brand -->
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(11,28,48,0.04)]">
+        <nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto w-full">
+            <a href="index.html" class="text-xl font-black tracking-tighter text-blue-700 dark:text-blue-500">TransitPulse</a>
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="index.html">Home</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="dashboard.html">Dashboard</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="live-map.html">Live Map</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="vehicle-detail.html">Vehicles</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="admin.html" id="admin-nav-link" style="display: none;">Admin</a>
+            </div>
+            <a href="dashboard.html" class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-semibold transition-all scale-95 active:scale-100 duration-200 shadow-lg shadow-primary/20">
+                Dashboard
+            </a>
+        </nav>
+    </header>
+
+    <div style="margin-top: 60px;">        <!-- Left Side: Product Illustration & Brand -->
         <section class="hidden md:flex flex-1 relative items-center justify-center bg-primary-container p-12 overflow-hidden">
             <!-- Decorative Elements -->
             <div class="absolute inset-0 z-0 opacity-20">
@@ -260,6 +277,24 @@
     </footer>
 
     <script>
+        // Check URL parameters for admin mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdminMode = urlParams.get('admin') === 'true';
+        const redirectUrl = urlParams.get('redirect');
+        const message = urlParams.get('message');
+
+        // Update UI for admin mode
+        if (isAdminMode) {
+            document.querySelector('h2').textContent = 'Admin Access';
+            document.querySelector('p').textContent = 'Enter your admin credentials to access the control panel.';
+            document.getElementById('email').placeholder = 'admin@transitpulse.com';
+            
+            // Show admin message if present
+            if (message === 'logged_out') {
+                showToast('You have been logged out successfully', 'Logged Out', 'check_circle');
+            }
+        }
+
         function showToast(msg, title = 'Info', icon = 'info') {
             const toast = document.getElementById('toast');
             document.getElementById('toast-title').textContent = title;
@@ -285,7 +320,7 @@
             }
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('email');
             const password = document.getElementById('password');
@@ -312,15 +347,51 @@
             if (!valid) return;
 
             const btn = document.getElementById('login-btn');
+            const originalText = btn.textContent;
             btn.textContent = 'Verifying...';
             btn.disabled = true;
 
-            // Simulate auth → show OTP modal
-            setTimeout(() => {
-                btn.textContent = 'Sign in';
+            try {
+                if (isAdminMode) {
+                    // Admin login
+                    const response = await fetch('http://localhost:3000/api/admin/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include', // Include cookies
+                        body: JSON.stringify({
+                            email: email.value,
+                            password: password.value
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        showToast('Admin login successful! Redirecting...', 'Welcome back', 'check_circle');
+                        setTimeout(() => {
+                            window.location.href = redirectUrl || 'admin.html';
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Invalid admin credentials', 'Login Failed', 'error');
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                } else {
+                    // Regular user login (simulate OTP for now)
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        document.getElementById('otp-modal').classList.remove('hidden');
+                    }, 1200);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Login failed. Please try again.', 'Error', 'error');
+                btn.textContent = originalText;
                 btn.disabled = false;
-                document.getElementById('otp-modal').classList.remove('hidden');
-            }, 1200);
+            }
         }
 
         // OTP auto-advance

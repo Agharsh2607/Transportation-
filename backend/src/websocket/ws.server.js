@@ -54,8 +54,19 @@ function createWSServer(httpServer) {
     if (channel === 'live_updates') {
       try {
         const data = JSON.parse(message);
+        // Broadcast to route-specific room
         if (data.route_id) {
-          broadcast(data.route_id, { type: 'position_update', data });
+          broadcast(data.route_id, { type: 'vehicle_update', vehicle: data });
+        }
+        // Also broadcast to all connected clients
+        for (const client of wss.clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            try {
+              client.send(JSON.stringify({ type: 'vehicle_update', vehicle: data }));
+            } catch (err) {
+              logger.warn('Failed to send vehicle update to client', { message: err.message });
+            }
+          }
         }
       } catch (err) {
         logger.error('WS: failed to parse live_updates message', { message: err.message });

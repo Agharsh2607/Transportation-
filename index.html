@@ -92,9 +92,11 @@
         <nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto w-full">
             <div class="text-xl font-black tracking-tighter text-blue-700 dark:text-blue-500">TransitPulse</div>
             <div class="hidden md:flex items-center gap-8">
-                <a class="text-blue-700 dark:text-blue-300 font-semibold border-b-2 border-blue-600 font-medium tracking-tight antialiased" href="#features">Features</a>
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="#how-it-works">How it Works</a>
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="#screens">Screens</a>
+                <a class="text-blue-700 dark:text-blue-300 font-semibold border-b-2 border-blue-600 font-medium tracking-tight antialiased" href="index.html">Home</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="dashboard.html">Dashboard</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="live-map.html">Live Map</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="vehicle-detail.html">Vehicles</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="admin.html" id="admin-nav-link" style="display: none;">Admin</a>
             </div>
             <a href="auth.html" class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-semibold transition-all scale-95 active:scale-100 duration-200 shadow-lg shadow-primary/20">
                 Get Started
@@ -423,5 +425,36 @@
         </div>
     </footer>
 
+    <script>
+        // Check if user has admin access and show admin link
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/check-auth', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.authenticated) {
+                        // Show admin link
+                        const adminLink = document.getElementById('admin-nav-link');
+                        if (adminLink) {
+                            adminLink.style.display = 'inline';
+                        }
+                    }
+                }
+            } catch (error) {
+                // Silently fail - admin link stays hidden
+                console.debug('Admin access check failed:', error);
+            }
+        }
+
+        // Check admin access on page load
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
+    </script>
 </body>
 </html>

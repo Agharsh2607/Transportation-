@@ -79,6 +79,24 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d3e4fe; border-radius: 10px; }
+        
+        .navbar-link {
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          color: #7f8c8d;
+          transition: color 0.2s ease;
+        }
+        
+        .navbar-link:hover {
+          color: #667eea;
+        }
+        
+        .navbar-link.active {
+          color: #0059bb;
+          font-weight: 600;
+          border-bottom: 2px solid #0059bb;
+        }
     </style>
 </head>
 <body class="bg-surface text-on-surface antialiased">
@@ -89,10 +107,11 @@
             <div class="flex items-center gap-8">
                 <span class="text-xl font-black tracking-tighter text-primary">TransitPulse</span>
                 <nav class="hidden md:flex gap-6 items-center">
-                    <a class="text-blue-600 font-bold font-['Inter'] text-sm" href="dashboard.html">Dashboard</a>
-                    <a class="text-slate-400 font-['Inter'] text-sm hover:text-blue-600 transition-all duration-200" href="live-map.html">Live Map</a>
-                    <a class="text-slate-400 font-['Inter'] text-sm hover:text-blue-600 transition-all duration-200" href="vehicle-detail.html">Vehicles</a>
-                    <a class="text-slate-400 font-['Inter'] text-sm hover:text-blue-600 transition-all duration-200" href="admin.html">Admin</a>
+                    <a class="navbar-link" href="index.html">Home</a>
+                    <a class="navbar-link active" href="dashboard.html">Dashboard</a>
+                    <a class="navbar-link" href="live-map.html">Live Map</a>
+                    <a class="navbar-link" href="vehicle-detail.html">Vehicles</a>
+                    <a class="navbar-link" href="admin.html" id="admin-nav-link" style="display: none;">Admin</a>
                 </nav>
             </div>
             <div class="flex items-center gap-4">
@@ -523,3 +542,37 @@
         updateTable();
         setInterval(tickSimulation, 2000);
     </script>
+
+    <script>
+        // Check if user has admin access and show admin link
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/check-auth', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.authenticated) {
+                        // Show admin link
+                        const adminLink = document.getElementById('admin-nav-link');
+                        if (adminLink) {
+                            adminLink.style.display = 'inline';
+                        }
+                    }
+                }
+            } catch (error) {
+                // Silently fail - admin link stays hidden
+                console.debug('Admin access check failed:', error);
+            }
+        }
+
+        // Check admin access on page load
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
+    </script>
+</body>
+</html>
