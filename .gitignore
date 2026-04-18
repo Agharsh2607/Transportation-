@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.local
+.env.production
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+dist/
+build/
+.vscode/
+.idea/
+*.swp
+*.swo
+coverage/
+.nyc_output/
