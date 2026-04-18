@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Celerity Transit | Smart Bus Tracking</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#adc7ff",
+                        "primary": "#0059bb",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "outline-variant": "#c1c6d7",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#004964",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001a41",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "secondary-fixed": "#c3e8ff",
+                        "surface-tint": "#005bc0",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#001e2c",
+                        "secondary": "#00668a",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-surface": "#0b1c30",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#9e3d00",
+                        "on-primary-container": "#fefcff",
+                        "primary-container": "#0070ea",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed-dim": "#7ad0ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#c64f00",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#00bdfd",
+                        "on-surface-variant": "#414754",
+                        "outline": "#717786",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#351000",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-fixed-variant": "#7c2e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ambient-shadow { shadow-[0_8px_30px_rgb(11,28,48,0.04)] }
+        .hero-gradient { background: linear-gradient(135deg, #0059bb 0%, #0070ea 100%); }
+        .dot-pattern { background-image: radial-gradient(#c1c6d7 1px, transparent 1px); background-size: 24px 24px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+
+    <!-- TopNavBar -->
+    <header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(11,28,48,0.04)]">
+        <nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto w-full">
+            <div class="text-xl font-black tracking-tighter text-blue-700 dark:text-blue-500">TransitPulse</div>
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-blue-700 dark:text-blue-300 font-semibold border-b-2 border-blue-600 font-medium tracking-tight antialiased" href="#features">Features</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="#how-it-works">How it Works</a>
+                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="#screens">Screens</a>
+            </div>
+            <a href="auth.html" class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-semibold transition-all scale-95 active:scale-100 duration-200 shadow-lg shadow-primary/20">
+                Get Started
+            </a>
+        </nav>
+    </header>
+
+    <main class="pt-20">
+
+        <!-- Hero Section -->
+        <section id="features" class="relative px-6 py-20 md:py-32 overflow-hidden">
+            <div class="absolute inset-0 dot-pattern opacity-20 pointer-events-none"></div>
+            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
+                <div class="space-y-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full border border-outline-variant/15">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary">System Live: Campus-Wide</span>
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-on-surface leading-[1.1]">
+                        Smart and resilient <span class="text-primary italic">college bus</span> tracking
+                    </h1>
+                    <p class="text-lg text-on-surface-variant max-w-lg leading-relaxed">
+                        Navigate campus with precision. Our AI-driven ETA predictions ensure resilience even during peak hours or network fluctuations. Trusted by 20+ universities worldwide.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="auth.html" class="hero-gradient text-on-primary px-8 py-4 rounded-full font-bold shadow-xl shadow-primary/30 scale-95 active:scale-100 transition-transform">
+                            Get Started
+                        </a>
+                        <a href="live-map.html" class="bg-surface-container-lowest border border-outline-variant/20 text-primary px-8 py-4 rounded-full font-bold hover:bg-surface-container-low transition-colors">
+                            View Live Demo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dashboard Mockup -->
+                <div class="relative group">
+                    <div class="absolute -inset-4 bg-gradient-to-tr from-primary/10 to-secondary/10 rounded-3xl blur-2xl group-hover:blur-3xl transition-all"></div>
+                    <div class="relative bg-surface-container-lowest p-4 rounded-[2rem] shadow-2xl border border-outline-variant/10 aspect-[4/3] flex flex-col gap-4">
+                        <div class="h-8 flex items-center gap-2 px-4">
+                            <div class="w-3 h-3 rounded-full bg-error/20"></div>
+                            <div class="w-3 h-3 rounded-full bg-tertiary-fixed-dim/40"></div>
+                            <div class="w-3 h-3 rounded-full bg-primary/20"></div>
+                            <div class="ml-auto bg-surface-container-low px-3 py-1 rounded text-[10px] font-mono text-on-surface-variant">transitpulse-v2.4</div>
+                        </div>
+                        <div class="flex-1 bg-surface-container-low rounded-2xl overflow-hidden relative">
+                            <img class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVpl3Mdh-5s87CsLp2LrO1Y9BNkbbMsWG5xBcyBivIhu0Dnoi3ey0l3c7Aw9Mv9kUrLAWwcy3mawPYK6HXBK2BR7PDqqT14dh56pIXwWsEbjuyOWKaNtm3-clFCGGVIO8lTg10veqYo4C2gTss2sObmLjWlOAOM26HjE_lVpSfcCG63kgsq-1GXJXbBLLaGAmPZLmxYik0PiCAUSpnezJ8Vk55etDVXD1latdLhj7b0tF7pbz2lhGnuPG0dK0tihRI0pKo36xEagA" alt="Transit map interface"/>
+                            <div class="absolute top-4 left-4 p-4 bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-white/20 w-48">
+                                <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mb-2">Active Vehicles</div>
+                                <div class="text-2xl font-black text-primary">12 / 14</div>
+                                <div class="mt-2 h-1 bg-surface-container rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary w-[85%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trusted Features: Bento Grid Style -->
+        <section id="how-it-works" class="px-6 py-24 bg-surface-container-low">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16 text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-on-surface mb-4">Resilience Engineered Into Every Mile</h2>
+                    <p class="text-on-surface-variant">Built for the unpredictable nature of campus transport.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[600px]">
+                    <!-- Feature 1: Real-time Tracking -->
+                    <div class="md:col-span-8 bg-surface-container-lowest rounded-3xl p-10 flex flex-col justify-between border border-outline-variant/10 group transition-all hover:translate-y-[-4px]">
+                        <div class="max-w-md">
+                            <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 text-primary">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">my_location</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3">Precision Pulse Tracking</h3>
+                            <p class="text-on-surface-variant leading-relaxed">Latency-free vehicle positioning using sub-second GPS intervals. Monitor your fleet across campus with pinpoint accuracy and smooth movement animations.</p>
+                        </div>
+                        <div class="mt-8 flex gap-3 overflow-hidden">
+                            <div class="bg-surface p-4 rounded-xl flex items-center gap-3 border border-outline-variant/5">
+                                <div class="w-2 h-10 bg-primary rounded-full"></div>
+                                <div>
+                                    <div class="text-[10px] uppercase font-bold text-outline">Route A</div>
+                                    <div class="text-sm font-bold">2m to Main Library</div>
+                                </div>
+                            </div>
+                            <div class="bg-surface p-4 rounded-xl flex items-center gap-3 border border-outline-variant/5 opacity-50">
+                                <div class="w-2 h-10 bg-secondary rounded-full"></div>
+                                <div>
+                                    <div class="text-[10px] uppercase font-bold text-outline">Route B</div>
+                                    <div class="text-sm font-bold">6m to Student Union</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: Network Resilience -->
+                    <div class="md:col-span-4 bg-primary-container rounded-3xl p-8 text-on-primary-container flex flex-col justify-between border border-primary/20 group transition-all hover:translate-y-[-4px]">
+                        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+                            <span class="material-symbols-outlined">signal_cellular_connected_no_internet_4_bar</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Zero-Drop Connectivity</h3>
+                            <p class="text-blue-100 text-sm leading-relaxed">Intelligent edge caching ensures that even in campus dead-zones, your tracking remains consistent and reliable.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: ETA Prediction -->
+                    <div class="md:col-span-4 bg-surface-container-highest rounded-3xl p-8 flex flex-col justify-between border border-outline-variant/10 group transition-all hover:translate-y-[-4px]">
+                        <div>
+                            <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 text-primary">
+                                <span class="material-symbols-outlined">timeline</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">AI-Driven ETA</h3>
+                            <p class="text-on-surface-variant text-sm leading-relaxed">Our models account for campus traffic patterns, weather, and class change timings to give you the most accurate predictions.</p>
+                        </div>
+                        <div class="mt-4 text-3xl font-black text-primary">99.8% Accuracy</div>
+                    </div>
+
+                    <!-- Feature 4: Offline Buffering -->
+                    <div class="md:col-span-8 bg-surface-container-lowest rounded-3xl p-10 flex flex-col md:flex-row gap-8 items-center border border-outline-variant/10 group transition-all hover:translate-y-[-4px]">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">Seamless Data Recovery</h3>
+                            <p class="text-on-surface-variant leading-relaxed">No data is lost. Offline buffering captures every data point and syncs instantly once connection is restored.</p>
+                        </div>
+                        <div class="flex-1 bg-surface rounded-2xl p-6 border border-outline-variant/5 w-full">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-xs font-bold text-on-surface-variant">Sync Progress</span>
+                                <span class="text-xs font-mono text-primary">Syncing 42 packets...</span>
+                            </div>
+                            <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                                <div class="h-full bg-primary w-2/3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it Works: Vertical Timeline Style -->
+        <section class="px-6 py-24 relative bg-surface overflow-hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-20">
+                    <h2 class="text-4xl font-extrabold tracking-tight mb-4">The Architecture of Certainty</h2>
+                    <p class="text-on-surface-variant">Sophisticated backend, simple frontend.</p>
+                </div>
+                <div class="relative">
+                    <!-- The Timeline Line -->
+                    <div class="absolute left-8 top-0 bottom-0 w-px bg-outline-variant/20 hidden md:block"></div>
+
+                    <!-- Step 1 -->
+                    <div class="relative flex flex-col md:flex-row gap-8 mb-24 items-start">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl relative z-10 shrink-0">1</div>
+                        <div class="flex-1 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 shadow-sm">
+                            <h4 class="text-xl font-bold mb-3">Vehicle GPS Transmission</h4>
+                            <p class="text-on-surface-variant leading-relaxed">On-board IoT devices transmit encrypted position and telemetry data to our hub every 800ms via resilient cellular protocols.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="relative flex flex-col md:flex-row gap-8 mb-24 items-start">
+                        <div class="w-16 h-16 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-xl relative z-10 shrink-0 border border-primary/20">2</div>
+                        <div class="flex-1 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 shadow-sm">
+                            <h4 class="text-xl font-bold mb-3">Distributed Backend Processing</h4>
+                            <p class="text-on-surface-variant leading-relaxed">Our cloud architecture cleans telemetry data, predicts arrival times using ML models, and prepares real-time streams for thousands of concurrent users.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative flex flex-col md:flex-row gap-8 items-start">
+                        <div class="w-16 h-16 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-xl relative z-10 shrink-0 border border-primary/20">3</div>
+                        <div class="flex-1 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 shadow-sm">
+                            <h4 class="text-xl font-bold mb-3">Instant Campus Access</h4>
+                            <p class="text-on-surface-variant leading-relaxed">Students and staff access the live map via mobile or web. Updates are pushed via web-sockets for an experience that feels instantaneous.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits: Asymmetric Grid -->
+        <section class="px-6 py-24 bg-surface-container-low/50">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- For Students -->
+                    <div class="bg-surface-container-lowest p-10 rounded-[2rem] border border-outline-variant/10 hover:shadow-xl transition-shadow">
+                        <h3 class="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6">Students</h3>
+                        <p class="text-3xl font-bold leading-tight mb-6">Never miss a class because of a missed bus.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Personalized route notifications</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">In-app 'Walk to Stop' alerts</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Crowd density indicators</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- For Admins -->
+                    <div class="bg-surface-container-lowest p-10 rounded-[2rem] border border-outline-variant/10 hover:shadow-xl transition-shadow md:mt-12">
+                        <h3 class="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-6">Administrators</h3>
+                        <p class="text-3xl font-bold leading-tight mb-6">Optimize fleet performance with hard data.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-secondary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Historical route efficiency audits</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-secondary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Automated maintenance logs</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-secondary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Driver performance metrics</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- For Coordinators -->
+                    <div class="bg-surface-container-lowest p-10 rounded-[2rem] border border-outline-variant/10 hover:shadow-xl transition-shadow">
+                        <h3 class="text-sm font-black text-tertiary uppercase tracking-[0.2em] mb-6">Coordinators</h3>
+                        <p class="text-3xl font-bold leading-tight mb-6">Manage disruptions before they happen.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-tertiary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Real-time route reallocation</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-tertiary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Instant campus-wide push alerts</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-tertiary text-sm mt-1">check_circle</span>
+                                <span class="text-on-surface-variant text-sm">Fuel &amp; idle-time optimization</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screens Preview: Interactive Visual -->
+        <section id="screens" class="px-6 py-24 bg-surface overflow-hidden">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
+                    <div class="max-w-xl">
+                        <h2 class="text-4xl font-extrabold tracking-tight mb-4">A unified interface for the entire ecosystem.</h2>
+                        <p class="text-on-surface-variant">From driver tablets to administrative command centers, we maintain a single source of truth.</p>
+                    </div>
+                    <div class="flex bg-surface-container rounded-full p-1 border border-outline-variant/10">
+                        <button class="px-6 py-2 rounded-full bg-white shadow-sm text-sm font-bold text-primary">Student Map</button>
+                        <button class="px-6 py-2 rounded-full text-sm font-medium text-on-surface-variant">Admin Panel</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="md:col-span-3 bg-surface-container-high rounded-[3rem] p-4 overflow-hidden shadow-2xl relative aspect-[21/9]">
+                        <img class="w-full h-full object-cover rounded-[2.5rem]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7j2hyQuu-GVJXzQ_JJO4Bj-OnQlPtBJVM0afGwBCqE7T_HcLbp8R4uT2qDiBYcU3j35-B0VlUd_KnJmJJYiLTnEJVhYoEP9QAX6WHv4SXrPFauTWMkyec7PlzckLyEJahSXgWrCM2I9x6CCIrLs3HFFLex4RM9JoYih0gjxfAOYG_PNw8ZRSzLQL7Pc-I-CU-H1h1a6FV5SJ-qFETK7sNSAH1_fLLqQa7xqlL3JX2n2SRe6mTHr3-qH69NpHOO_L8ZNHsdooytJA" alt="Dashboard preview"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-on-surface/40 to-transparent"></div>
+                        <div class="absolute bottom-10 left-10 text-white">
+                            <h4 class="text-2xl font-bold mb-2">Live Map Command Center</h4>
+                            <p class="text-white/80 max-w-sm">Global view of all active routes with real-time health metrics and delay warnings.</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest rounded-[3rem] p-4 shadow-xl border border-outline-variant/10 hidden md:block">
+                        <div class="h-full w-full bg-surface rounded-[2.5rem] p-6 flex flex-col gap-6">
+                            <div class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Admin Stats</div>
+                            <div class="space-y-6">
+                                <div class="p-4 bg-white rounded-2xl border border-outline-variant/5">
+                                    <div class="text-2xl font-bold">1,240</div>
+                                    <div class="text-[10px] text-on-surface-variant">Rides Completed Today</div>
+                                </div>
+                                <div class="p-4 bg-white rounded-2xl border border-outline-variant/5">
+                                    <div class="text-2xl font-bold">0.8s</div>
+                                    <div class="text-[10px] text-on-surface-variant">Avg. Backend Latency</div>
+                                </div>
+                                <div class="p-4 bg-white rounded-2xl border border-outline-variant/5">
+                                    <div class="text-2xl font-bold">94%</div>
+                                    <div class="text-[10px] text-on-surface-variant">Route Punctuality</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="px-6 py-24">
+            <div class="max-w-5xl mx-auto hero-gradient rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl shadow-primary/20">
+                <div class="absolute inset-0 dot-pattern opacity-10"></div>
+                <h2 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-8 relative z-10">Ready to transform your campus transit?</h2>
+                <p class="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto mb-12 relative z-10 leading-relaxed">Join the movement towards a smarter, more resilient tracking experience. Onboard your campus in less than 24 hours.</p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center relative z-10">
+                    <a href="auth.html" class="bg-white text-primary px-10 py-5 rounded-full font-black text-lg shadow-xl hover:scale-105 transition-transform">Start tracking today</a>
+                    <a href="live-map.html" class="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-5 rounded-full font-bold text-lg hover:bg-white/20 transition-colors">Request a Demo</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-12 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900">
+        <div class="max-w-7xl mx-auto px-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex flex-col items-center md:items-start gap-2">
+                <div class="text-sm font-bold text-slate-900 dark:text-slate-100">TransitPulse</div>
+                <p class="font-['Inter'] text-xs text-slate-400">© 2024 TransitPulse Precision Tracking. All rights reserved.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-8">
+                <a class="font-['Inter'] text-xs text-slate-400 font-medium hover:text-blue-500 underline-offset-4 hover:underline transition-opacity" href="#">Privacy Policy</a>
+                <a class="font-['Inter'] text-xs text-slate-400 font-medium hover:text-blue-500 underline-offset-4 hover:underline transition-opacity" href="#">Terms of Service</a>
+                <a class="font-['Inter'] text-xs text-slate-400 font-medium hover:text-blue-500 underline-offset-4 hover:underline transition-opacity" href="#">Campus Map</a>
+                <a class="font-['Inter'] text-xs text-slate-400 font-medium hover:text-blue-500 underline-offset-4 hover:underline transition-opacity" href="#">System Status</a>
+            </div>
+            <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">public</span>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">alternate_email</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
