@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: transit_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: transit_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/db/migrations/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d transit_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: transit_redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: transit_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: transit_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_POOL_MAX: 10
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
+      VEHICLE_SECRET: vehicle_secret_key_change_in_prod
+      ADMIN_JWT_SECRET: admin_jwt_secret_change_in_prod
+      ETA_UPDATE_INTERVAL_MS: 800
+      ETA_DEGRADED_INTERVAL_MS: 5000
+      OFFLINE_BUFFER_WINDOW_MIN: 5
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./src:/app/src:ro
+
+volumes:
+  postgres_data:
+  redis_data:
