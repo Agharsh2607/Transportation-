@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TransitPulse - Live Map</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#213145",
+                    "inverse-primary": "#adc7ff",
+                    "primary": "#0059bb",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "outline-variant": "#c1c6d7",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-container": "#004964",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#001a41",
+                    "surface": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#004c69",
+                    "secondary-fixed": "#c3e8ff",
+                    "surface-tint": "#005bc0",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary-fixed": "#001e2c",
+                    "secondary": "#00668a",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "primary-fixed-dim": "#adc7ff",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#004493",
+                    "on-surface": "#0b1c30",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "tertiary": "#9e3d00",
+                    "on-primary-container": "#fefcff",
+                    "primary-container": "#0070ea",
+                    "surface-container-low": "#eff4ff",
+                    "secondary-fixed-dim": "#7ad0ff",
+                    "surface-container": "#e5eeff",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#c64f00",
+                    "on-tertiary-container": "#fffbff",
+                    "secondary-container": "#00bdfd",
+                    "on-surface-variant": "#414754",
+                    "outline": "#717786",
+                    "background": "#f8f9ff",
+                    "on-tertiary-fixed": "#351000",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#cbdbf5",
+                    "on-tertiary-fixed-variant": "#7c2e00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ambient-shadow { shadow-[0_24px_40px_rgb(11,28,48,0.06)]; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        #map { width: 100%; height: 100%; z-index: 1; }
+        .leaflet-container { background: #e8f0fe; }
+        .bus-marker { background: #0059bb; color: white; border-radius: 10px; padding: 4px 6px; font-size: 10px; font-weight: 900; font-family: Inter, sans-serif; box-shadow: 0 4px 12px rgba(0,89,187,0.4); border: 2px solid white; white-space: nowrap; }
+        .bus-marker.delayed { background: #ba1a1a; box-shadow: 0 4px 12px rgba(186,26,26,0.4); }
+        .stop-marker { background: white; border: 2px solid #0059bb; border-radius: 50%; width: 12px; height: 12px; }
+        .network-banner { transition: all 0.4s ease; }
+        .network-banner.offline { background: #ffdad6; color: #93000a; }
+        .network-banner.degraded { background: #ffdbcc; color: #7c2e00; }
+    </style>
+</head>
+<body class="text-on-surface overflow-hidden">
+
+    <!-- SideNavBar (Shared Component) -->
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col p-4 gap-2 z-50">
+        <div class="mb-8 px-2">
+            <h1 class="text-lg font-bold text-blue-900 dark:text-blue-100">TransitPulse</h1>
+            <p class="text-xs text-slate-400 font-medium">Precision Pulse v2.4</p>
+        </div>
+        <nav class="flex flex-col gap-1 flex-1">
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-['Inter'] text-sm font-medium tap-highlight-transparent" href="dashboard.html">
+                <span class="material-symbols-outlined">grid_view</span>
+                <span>Dashboard</span>
+            </a>
+            <!-- Active Navigation State: Live Map -->
+            <a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-300 shadow-sm rounded-xl hover:translate-x-1 transition-all duration-300 font-['Inter'] text-sm font-medium tap-highlight-transparent" href="live-map.html">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+                <span>Live Map</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-['Inter'] text-sm font-medium tap-highlight-transparent" href="vehicle-detail.html">
+                <span class="material-symbols-outlined">directions_bus</span>
+                <span>Vehicles</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-['Inter'] text-sm font-medium tap-highlight-transparent" href="admin.html">
+                <span class="material-symbols-outlined">settings_accessibility</span>
+                <span>Admin</span>
+            </a>
+        </nav>
+        <div class="pt-4 mt-auto flex flex-col gap-1 border-t border-slate-100 dark:border-slate-900">
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-['Inter'] text-sm font-medium tap-highlight-transparent" href="#">
+                <span class="material-symbols-outlined">help_outline</span>
+                <span>Support</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-['Inter'] text-sm font-medium tap-highlight-transparent" href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Settings</span>
+            </a>
+            <div class="mt-4 px-4">
+                <button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-full text-xs font-bold tracking-wide uppercase shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+                    Live Status
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="ml-64 relative h-screen w-[calc(100%-16rem)] bg-surface p-4 flex gap-4 overflow-hidden">
+
+        <!-- Top Navigation Bar (System Health Context) -->
+        <header class="absolute top-8 left-8 right-[23rem] z-40 bg-white/90 backdrop-blur-md shadow-sm rounded-2xl flex justify-between items-center px-6 py-3">
+            <div class="flex items-center gap-6 flex-1">
+                <div class="relative w-64">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input class="w-full bg-slate-50/50 border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Search route, bus or station..." type="text"/>
+                </div>
+                <div class="h-6 w-[1px] bg-slate-200"></div>
+                <div class="flex gap-4">
+                    <button class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-primary text-xs font-semibold">
+                        <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        All Routes
+                    </button>
+                    <button class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-semibold hover:bg-slate-100 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">timer</span>
+                        Express Only
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-all">
+                    <span class="material-symbols-outlined">history_toggle_off</span>
+                </button>
+                <div class="relative">
+                    <button class="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-all">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+                </div>
+                <img class="w-8 h-8 rounded-full object-cover border border-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzsv2vU-LtGk2oUCglsgKiR5E53EN3U2IuH5WpKOZZ_yNrGHsoUOS9vLjqrx_0V5rn_pKBatTrhqyco4OOW11lYAliO4DgPA_LdTOVR5gn6pU2E_D6IlGuaxD029CdarbgAI1oM5t_YNwAVH7TiGPmsPtebg_f7zYEEx_gyTNOdjr2ln4eNFDHyce3C8YOA6KxkXfUoTC8PNgfzGzzygHsMilFg_upAF5jxk7DyKtX48cg0_ieoOha72GAI6nwfn7IslYo_UMfC5Q" alt="Profile"/>
+            </div>
+        </header>
+
+        <!-- Map Background Layer -->
+        <section class="flex-1 relative rounded-3xl overflow-hidden bg-surface-container-low shadow-inner" id="map-section">
+            <!-- Network Status Banner -->
+            <div id="network-banner" class="network-banner absolute top-20 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-full text-xs font-bold shadow-lg">
+                <span id="network-banner-text"></span>
+            </div>
+
+            <!-- Leaflet Map -->
+            <div id="map" class="absolute inset-0 rounded-3xl"></div>
+
+            <!-- System Status Indicator Overlay -->
+            <div class="absolute bottom-8 left-8 z-30 glass-panel bg-white/80 p-4 rounded-2xl shadow-[0_24px_40px_rgb(11,28,48,0.06)] flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary flex items-center justify-center">
+                    <span class="text-[10px] font-bold text-primary" id="sys-health">98%</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-on-surface">System Status</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-primary rounded-full animate-pulse" id="sys-dot"></span>
+                        <p class="text-[11px] text-on-surface-variant font-medium" id="sys-label">Optimal Performance</p>
+                    </div>
+                </div>
+                <div class="w-[1px] h-10 bg-slate-200 mx-2"></div>
+                <div class="pr-2">
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Last Updated</p>
+                    <p class="text-xs font-semibold text-on-surface" id="sys-time">--:--:-- --</p>
+                </div>
+            </div>
+
+            <!-- Map Controls (Vertical Zoom Pill) -->
+            <div class="absolute bottom-8 right-8 z-30 flex flex-col gap-2">
+                <div class="flex flex-col bg-white/90 backdrop-blur-md rounded-2xl shadow-sm">
+                    <button class="p-3 text-slate-500 hover:text-primary transition-colors border-b border-slate-100" onclick="mapInstance.zoomIn()">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                    <button class="p-3 text-slate-500 hover:text-primary transition-colors" onclick="mapInstance.zoomOut()">
+                        <span class="material-symbols-outlined">remove</span>
+                    </button>
+                </div>
+                <button class="p-3 bg-white/90 backdrop-blur-md rounded-2xl shadow-sm text-slate-500 hover:text-primary transition-colors" onclick="recenterMap()">
+                    <span class="material-symbols-outlined">my_location</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Right-side Sidebar: Selected Bus Details -->
+        <aside class="w-80 flex flex-col gap-4">
+            <div class="flex-1 bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(11,28,48,0.02)] overflow-y-auto no-scrollbar border border-slate-50">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <span class="text-[10px] font-bold text-primary-container bg-primary-fixed-dim px-2 py-0.5 rounded-full uppercase tracking-widest">Active Vehicle</span>
+                        <h2 class="text-2xl font-black text-on-surface mt-2 tracking-tighter">Bus B-124</h2>
+                        <p class="text-sm text-on-surface-variant font-medium">Route 42: Sunset Blvd</p>
+                    </div>
+                    <button class="p-2 bg-slate-50 rounded-full text-slate-400 hover:bg-slate-100 transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <!-- Resilience Gauge Component -->
+                <div class="bg-surface-container-low rounded-2xl p-4 mb-6 relative overflow-hidden">
+                    <div class="flex justify-between items-end mb-4 relative z-10">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Occupancy Health</p>
+                            <p class="text-3xl font-black text-primary leading-none">72%</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-on-secondary-container bg-secondary-container px-2 py-1 rounded-lg">MODERATE</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-primary to-secondary-container rounded-full" style="width: 72%;"></div>
+                    </div>
+                    <!-- Aesthetic texture -->
+                    <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-primary/5 rounded-full blur-2xl"></div>
+                </div>
+
+                <!-- Metrics Bento Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Current Speed</p>
+                        <p class="text-lg font-bold text-on-surface">34 <span class="text-xs font-medium text-slate-400">mph</span></p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">ETA Next Stop</p>
+                        <p class="text-lg font-bold text-on-surface">4 <span class="text-xs font-medium text-slate-400">min</span></p>
+                    </div>
+                </div>
+
+                <!-- Timeline / Next Stops -->
+                <div class="space-y-6">
+                    <h4 class="text-xs font-black text-on-surface uppercase tracking-widest border-b border-slate-100 pb-2">Upcoming Stops</h4>
+                    <div class="relative pl-8">
+                        <!-- Timeline Line -->
+                        <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-slate-100"></div>
+
+                        <!-- Event 1 (Current/Past) -->
+                        <div class="relative mb-6">
+                            <div class="absolute -left-[25px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white shadow-sm z-10"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-bold text-primary">Main St. Station</p>
+                                    <p class="text-[10px] text-slate-400">Arrived at 12:40 PM</p>
+                                </div>
+                                <span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            </div>
+                        </div>
+
+                        <!-- Event 2 (Next Stop) -->
+                        <div class="relative mb-6 glass-panel bg-primary-container text-white p-3 rounded-xl ml-[-8px] shadow-lg shadow-primary/10">
+                            <div class="absolute -left-[17px] top-4 w-4 h-4 bg-white rounded-full border-4 border-primary z-10"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-bold">Harbor Central</p>
+                                    <p class="text-[10px] opacity-80">ETA 12:48 PM</p>
+                                </div>
+                                <div class="bg-white/20 px-2 py-1 rounded text-[9px] font-bold">NEXT</div>
+                            </div>
+                        </div>
+
+                        <!-- Event 3 (Future) -->
+                        <div class="relative">
+                            <div class="absolute -left-[25px] top-1 w-4 h-4 bg-slate-200 rounded-full border-4 border-white z-10"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-600">Riverside Dr.</p>
+                                    <p class="text-[10px] text-slate-400">Scheduled 12:55 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button Section -->
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <button class="w-full bg-slate-900 text-white py-4 rounded-2xl text-sm font-bold flex items-center justify-center gap-3 hover:bg-black transition-colors">
+                        <span class="material-symbols-outlined">analytics</span>
+                        View Route Performance
+                    </button>
+                    <button class="w-full mt-3 text-primary text-xs font-bold py-2 hover:underline">
+                        Assign Maintenance Check
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mini Summary Card -->
+            <div class="bg-surface-container-high rounded-3xl p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                        <span class="material-symbols-outlined text-primary">warning</span>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-bold text-on-surface" id="alert-count">1 Delay Alert</p>
+                        <p class="text-[9px] text-on-surface-variant font-medium" id="alert-detail">Route 12 - Construction</p>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // ── Leaflet Map + Real-time Bus Simulation ─────────────────────────────
+
+        // Campus center (using a generic university-like location)
+        const CENTER = [12.9716, 77.5946]; // Bangalore as example campus
+        const mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView(CENTER, 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(mapInstance);
+
+        L.control.attribution({ prefix: false }).addTo(mapInstance);
+
+        // Campus bus stops
+        const stops = [
+            { name: 'Main Library',    latlng: [12.9730, 77.5930] },
+            { name: 'Student Union',   latlng: [12.9720, 77.5960] },
+            { name: 'Science Block',   latlng: [12.9700, 77.5970] },
+            { name: 'Admin Building',  latlng: [12.9710, 77.5920] },
+            { name: 'Sports Complex',  latlng: [12.9740, 77.5950] },
+        ];
+
+        const stopIcon = L.divIcon({ className: '', html: '<div class="stop-marker"></div>', iconSize: [12, 12] });
+        stops.forEach(s => {
+            L.marker(s.latlng, { icon: stopIcon }).addTo(mapInstance)
+                .bindTooltip(s.name, { permanent: false, className: 'text-xs font-bold' });
+        });
+
+        // Route polylines
+        const routeA = stops.map(s => s.latlng);
+        L.polyline(routeA, { color: '#0059bb', weight: 3, opacity: 0.6, dashArray: '8 6' }).addTo(mapInstance);
+
+        // Bus fleet
+        const buses = [
+            { id: 'B-124', route: 'Route A: Northside', status: 'live',    latlng: [12.9725, 77.5935], target: [12.9730, 77.5960], eta: 4 },
+            { id: 'B-882', route: 'Route B: Central',   status: 'delayed', latlng: [12.9705, 77.5965], target: [12.9710, 77.5920], eta: 12 },
+            { id: 'B-310', route: 'Route C: Express',   status: 'live',    latlng: [12.9740, 77.5945], target: [12.9700, 77.5970], eta: 2 },
+        ];
+
+        function makeBusIcon(bus) {
+            const cls = bus.status === 'delayed' ? 'bus-marker delayed' : 'bus-marker';
+            return L.divIcon({ className: '', html: `<div class="${cls}">🚌 ${bus.id}</div>`, iconSize: [70, 28] });
+        }
+
+        const markers = {};
+        buses.forEach(bus => {
+            markers[bus.id] = L.marker(bus.latlng, { icon: makeBusIcon(bus) })
+                .addTo(mapInstance)
+                .bindPopup(`<b>${bus.id}</b><br>${bus.route}<br>ETA: ${bus.eta} min`)
+                .on('click', () => selectBus(bus));
+        });
+
+        // Smooth interpolation between GPS points
+        function interpolate(from, to, t) {
+            return [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t];
+        }
+
+        let interpT = {};
+        buses.forEach(b => { interpT[b.id] = 0; });
+
+        function animateBuses() {
+            buses.forEach(bus => {
+                if (bus.status === 'offline') return;
+                interpT[bus.id] = Math.min(1, (interpT[bus.id] || 0) + 0.01);
+                const pos = interpolate(bus.latlng, bus.target, interpT[bus.id]);
+                markers[bus.id].setLatLng(pos);
+
+                // When reached target, pick new target near a stop
+                if (interpT[bus.id] >= 1) {
+                    bus.latlng = [...bus.target];
+                    const nextStop = stops[Math.floor(Math.random() * stops.length)];
+                    bus.target = [
+                        nextStop.latlng[0] + (Math.random() - 0.5) * 0.002,
+                        nextStop.latlng[1] + (Math.random() - 0.5) * 0.002
+                    ];
+                    interpT[bus.id] = 0;
+                    bus.eta = Math.max(1, bus.eta - 1);
+                    markers[bus.id].setIcon(makeBusIcon(bus));
+                    markers[bus.id].setPopupContent(`<b>${bus.id}</b><br>${bus.route}<br>ETA: ${bus.eta} min`);
+                }
+            });
+        }
+
+        // Network quality simulation
+        let netQuality = 'good';
+        let updateInterval = 500;
+        let animTimer;
+
+        function setNetworkQuality(q) {
+            netQuality = q;
+            const banner = document.getElementById('network-banner');
+            const bannerText = document.getElementById('network-banner-text');
+            const sysLabel = document.getElementById('sys-label');
+            const sysDot = document.getElementById('sys-dot');
+            const sysHealth = document.getElementById('sys-health');
+
+            clearInterval(animTimer);
+
+            if (q === 'offline') {
+                banner.className = 'network-banner absolute top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-bold shadow-lg offline';
+                bannerText.textContent = '⚠ Network Offline — Buffering GPS data';
+                banner.classList.remove('hidden');
+                sysLabel.textContent = 'Offline — Buffering';
+                sysDot.className = 'w-2 h-2 bg-error rounded-full';
+                sysHealth.textContent = '0%';
+                updateInterval = 0; // pause animation
+            } else if (q === 'degraded') {
+                banner.className = 'network-banner absolute top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-bold shadow-lg degraded';
+                bannerText.textContent = '⚡ High Latency — Adaptive mode active';
+                banner.classList.remove('hidden');
+                sysLabel.textContent = 'Degraded — Adaptive';
+                sysDot.className = 'w-2 h-2 bg-tertiary rounded-full animate-pulse';
+                sysHealth.textContent = '62%';
+                updateInterval = 2000;
+            } else {
+                banner.classList.add('hidden');
+                sysLabel.textContent = 'Optimal Performance';
+                sysDot.className = 'w-2 h-2 bg-primary rounded-full animate-pulse';
+                sysHealth.textContent = '98%';
+                updateInterval = 500;
+            }
+
+            if (updateInterval > 0) {
+                animTimer = setInterval(animateBuses, updateInterval);
+            }
+        }
+
+        // Randomly simulate network changes
+        setInterval(() => {
+            const r = Math.random();
+            if (r < 0.05)      setNetworkQuality('offline');
+            else if (r < 0.15) setNetworkQuality('degraded');
+            else               setNetworkQuality('good');
+        }, 5000);
+
+        // Clock
+        setInterval(() => {
+            document.getElementById('sys-time').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+
+        // Select bus → update sidebar
+        function selectBus(bus) {
+            document.querySelector('h2.text-2xl').textContent = `Bus ${bus.id}`;
+            document.querySelector('p.text-sm.text-on-surface-variant').textContent = bus.route;
+            document.querySelector('.text-3xl.font-black.text-primary').textContent = bus.eta > 0 ? bus.eta + ' min' : 'Arriving';
+        }
+
+        function recenterMap() {
+            mapInstance.setView(CENTER, 15);
+        }
+
+        // Start animation
+        setNetworkQuality('good');
+
+        // Alert counter
+        setInterval(() => {
+            const delayed = buses.filter(b => b.status === 'delayed').length;
+            document.getElementById('alert-count').textContent = `${delayed} Delay Alert${delayed !== 1 ? 's' : ''}`;
+        }, 3000);
+    </script>
+
+</body>
+</html>

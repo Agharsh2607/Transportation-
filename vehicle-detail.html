@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Vehicle Detail - TransitPulse</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#adc7ff",
+                        "primary": "#0059bb",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "outline-variant": "#c1c6d7",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#004964",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001a41",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "secondary-fixed": "#c3e8ff",
+                        "surface-tint": "#005bc0",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#001e2c",
+                        "secondary": "#00668a",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-surface": "#0b1c30",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#9e3d00",
+                        "on-primary-container": "#fefcff",
+                        "primary-container": "#0070ea",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed-dim": "#7ad0ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#c64f00",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#00bdfd",
+                        "on-surface-variant": "#414754",
+                        "outline": "#717786",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#351000",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-fixed-variant": "#7c2e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ambient-shadow { box-shadow: 0 24px 48px -12px rgba(11, 28, 48, 0.06); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-on-background antialiased">
+
+    <!-- SideNavBar Shell -->
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col p-4 gap-2 z-30">
+        <div class="mb-8 px-2">
+            <h1 class="text-lg font-bold text-blue-900 dark:text-blue-100">TransitPulse</h1>
+            <p class="text-xs text-slate-400 font-medium">Precision Pulse v2.4</p>
+        </div>
+        <nav class="flex-grow space-y-1">
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-medium text-sm" href="dashboard.html">
+                <span class="material-symbols-outlined">grid_view</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-medium text-sm" href="live-map.html">
+                <span class="material-symbols-outlined">explore</span>
+                <span>Live Map</span>
+            </a>
+            <!-- Active State: Vehicles -->
+            <a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-300 shadow-sm rounded-xl hover:translate-x-1 transition-all duration-300 font-medium text-sm" href="vehicle-detail.html">
+                <span class="material-symbols-outlined">directions_bus</span>
+                <span>Vehicles</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl hover:translate-x-1 transition-all duration-300 font-medium text-sm" href="admin.html">
+                <span class="material-symbols-outlined">settings_accessibility</span>
+                <span>Admin</span>
+            </a>
+        </nav>
+        <div class="mt-auto border-t border-slate-200/50 pt-4 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl transition-all font-medium text-sm" href="#">
+                <span class="material-symbols-outlined">help_outline</span>
+                <span>Support</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-blue-50/50 dark:hover:bg-slate-900/50 rounded-xl transition-all font-medium text-sm" href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Settings</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="ml-64 min-h-screen bg-surface">
+        <!-- TopNavBar Shell (Medium) -->
+        <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm flex justify-between items-center px-8 py-3">
+            <div class="flex items-center gap-4 flex-grow">
+                <div class="relative w-full max-w-md">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input class="w-full bg-slate-50 border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search vehicle ID or Route..." type="text"/>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-all">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-all">
+                    <span class="material-symbols-outlined">history_toggle_off</span>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-primary-container overflow-hidden">
+                    <img alt="Administrator Profile" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhZ4hzP-hh35OZQ1R_B2VgUNbQymouwRtokfl7TetUltNQrNvkStNAQd7FfqiJEjNuwPC2Rwc_DvqYMGIXTRQgb19FHR6D0wS3d_5vBDlRMm4qh3qJiqvA86bDJrbve_NzPp-_0WpvUeACYj-uCbQjxLG15ymz1j01o0wv7VWDjt4I--bcNfH2lmYee6Zehus1J5VRxftFYz2ehpjFu84nhpUwYIsPAtTfvz0_7gET-lVWiX3Z66ECp6fylT5vu3Y192uB9NKnqrE"/>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl mx-auto space-y-8">
+            <!-- Breadcrumbs / Action Row -->
+            <div class="flex justify-between items-center">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2 text-on-surface-variant">
+                        <span class="label-sm font-medium tracking-wider uppercase text-[10px]">Fleet Management</span>
+                        <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                        <span class="label-sm font-medium tracking-wider uppercase text-[10px]">Active Units</span>
+                    </div>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Vehicle XP-2402</h2>
+                </div>
+                <div class="flex gap-3">
+                    <button class="px-6 py-2 rounded-full font-semibold text-sm border border-outline-variant/30 text-primary hover:bg-surface-container-low transition-all">
+                        Request Diagnostics
+                    </button>
+                    <button class="px-6 py-2 rounded-full font-semibold text-sm bg-gradient-to-br from-primary to-primary-container text-on-primary ambient-shadow hover:scale-105 transition-all">
+                        Live Tracking
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bento Grid Layout -->
+            <div class="grid grid-cols-12 gap-6">
+                <!-- Main Info Card -->
+                <div class="col-span-12 lg:col-span-8 space-y-6">
+                    <div class="bg-surface-container-lowest p-8 rounded-xl ambient-shadow flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-32 h-32 rounded-2xl bg-surface-container-highest flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">directions_bus</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow grid grid-cols-2 gap-y-6 gap-x-12">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Model Name</p>
+                                <p class="text-xl font-bold text-on-surface">Volt-Transit Aero 4</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Driver Profile</p>
+                                <div class="flex items-center gap-3">
+                                    <img class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlvQcE-MuAC5FYAMwQ1wEwHBNMLX48YmwgLI-41HAyXPpab6_yWEdh49jjtznZ42OHrcmoflR6w-4O2pQ-S76aztWSRmKApO1D4o9aEgqTNMeH17M3HnKFjtZ7myWCxrfYVZvYTiiFyXP0XivM3Fg43HKH1ue-I-uFq28qf9b8fTfbNTy87MYxObmxpBfh2TAN8uJ_e5vMa_tdTiy_gDtUw2agM1P8DDb2EppE_6PbN9q_mr6bpdo6Iwmt06wPPyk-tAu7ruoj7vE" alt="Driver"/>
+                                    <p class="font-semibold text-on-surface">Marcus Thorne</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Route Assignment</p>
+                                <p class="font-semibold text-primary">Route 42: Northern Express</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Operating License</p>
+                                <p class="font-mono text-sm bg-surface-container-low px-2 py-1 rounded w-fit">TX-7700-0024-XP</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indicators Row -->
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="material-symbols-outlined text-primary">speed</span>
+                                <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-tighter">Current Velocity</span>
+                            </div>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-4xl font-black text-on-surface" id="speed-val">42</span>
+                                <span class="text-sm font-medium text-on-surface-variant">km/h</span>
+                            </div>
+                        </div>
+                        <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="material-symbols-outlined text-secondary">battery_charging_full</span>
+                                <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-tighter">Charge Level</span>
+                            </div>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-4xl font-black text-on-surface" id="battery-val">88</span>
+                                <span class="text-sm font-medium text-on-surface-variant">%</span>
+                            </div>
+                        </div>
+                        <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="material-symbols-outlined" id="net-icon">wifi_off</span>
+                                <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-tighter">System Status</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-primary animate-pulse" id="net-dot"></div>
+                                <span class="text-xl font-bold text-on-surface" id="net-status">Connected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Map Card -->
+                    <div class="bg-surface-container-lowest rounded-xl overflow-hidden ambient-shadow h-80 relative">
+                        <div class="absolute inset-0 bg-slate-200">
+                            <img class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnDApwqj-9qAnJ72gplrx5hZPUV02ERLbhLUjCVWZwUhNg9Yfz2NQlAdmOmgVBjNVX7CAq1B-E51gxlpK5j4wm1gE224m5k3bb-owjrOYTmF9dPB6z52hK-Ktto07yn8LXXKYxTen0QqtBhJAW2lU_IUFveEbrcSA6xv5vq-7N-H3BQte29jTGravPw52dNNBpIiikuUAy1MEC3cV_w8AyN_60NwWveXnmSLjsCA_83YRc6b_Af0XcWfLoIqCGRnocU43Lrri-N-Y" alt="Map"/>
+                            <!-- Simulated Map Overlay -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="relative">
+                                    <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center animate-ping absolute -inset-0"></div>
+                                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center border-4 border-white shadow-lg relative z-10">
+                                        <span class="material-symbols-outlined text-white text-xl">directions_bus</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute top-4 left-4 glass-panel bg-white/70 p-3 rounded-xl border border-white/50">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Live Segment</p>
+                            <p class="text-sm font-extrabold">Harbor View -&gt; Civic Center</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Sidebar -->
+                <div class="col-span-12 lg:col-span-4">
+                    <div class="bg-surface-container-lowest p-8 rounded-xl ambient-shadow h-full">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="text-xl font-black text-on-surface">ETA Timeline</h3>
+                            <span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold rounded-full uppercase tracking-tighter">On Time</span>
+                        </div>
+                        <div class="relative">
+                            <!-- Timeline Line -->
+                            <div class="absolute left-[11px] top-2 bottom-2 w-[2px] bg-outline-variant/20"></div>
+                            <!-- Stops -->
+                            <div class="space-y-10 relative">
+                                <!-- Active Stop -->
+                                <div class="flex gap-6 items-start">
+                                    <div class="z-10 w-6 h-6 rounded-full bg-primary flex items-center justify-center border-4 border-white shadow-sm ring-4 ring-primary/10">
+                                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                                    </div>
+                                    <div class="glass-panel bg-primary-container p-4 rounded-2xl w-full">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <p class="text-white text-xs font-bold uppercase tracking-wider">Current Stop</p>
+                                            <span class="text-white/80 font-mono text-xs">Arriving</span>
+                                        </div>
+                                        <p class="text-white text-lg font-black tracking-tight">Main Terminal Hub</p>
+                                        <p class="text-white/70 text-xs mt-1">Platform 4B • Sector North</p>
+                                    </div>
+                                </div>
+                                <!-- Upcoming Stops -->
+                                <div class="flex gap-6 items-start">
+                                    <div class="z-10 w-6 h-6 rounded-full bg-primary-fixed-dim flex items-center justify-center border-4 border-white shadow-sm"></div>
+                                    <div class="w-full">
+                                        <div class="flex justify-between items-baseline mb-1">
+                                            <p class="text-on-surface text-lg font-bold tracking-tight">Financial District</p>
+                                            <span class="text-primary font-mono text-sm font-black">14:04</span>
+                                        </div>
+                                        <p class="text-on-surface-variant text-xs font-medium">+2.4km from current</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-6 items-start opacity-75">
+                                    <div class="z-10 w-6 h-6 rounded-full bg-primary-fixed-dim flex items-center justify-center border-4 border-white shadow-sm"></div>
+                                    <div class="w-full">
+                                        <div class="flex justify-between items-baseline mb-1">
+                                            <p class="text-on-surface text-lg font-bold tracking-tight">Old Town East</p>
+                                            <span class="text-on-surface-variant font-mono text-sm font-bold">14:12</span>
+                                        </div>
+                                        <p class="text-on-surface-variant text-xs font-medium">+4.1km from current</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-6 items-start opacity-50">
+                                    <div class="z-10 w-6 h-6 rounded-full bg-primary-fixed-dim flex items-center justify-center border-4 border-white shadow-sm"></div>
+                                    <div class="w-full">
+                                        <div class="flex justify-between items-baseline mb-1">
+                                            <p class="text-on-surface text-lg font-bold tracking-tight">Science Park</p>
+                                            <span class="text-on-surface-variant font-mono text-sm font-bold">14:28</span>
+                                        </div>
+                                        <p class="text-on-surface-variant text-xs font-medium">+7.8km from current</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-6 items-start opacity-30">
+                                    <div class="z-10 w-6 h-6 rounded-full bg-primary-fixed-dim flex items-center justify-center border-4 border-white shadow-sm"></div>
+                                    <div class="w-full">
+                                        <div class="flex justify-between items-baseline mb-1">
+                                            <p class="text-on-surface text-lg font-bold tracking-tight">Grand Plaza</p>
+                                            <span class="text-on-surface-variant font-mono text-sm font-bold">14:45</span>
+                                        </div>
+                                        <p class="text-on-surface-variant text-xs font-medium">+12.0km from current</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resilience Gauge Signature Component -->
+                        <div class="mt-12 p-6 bg-surface-container-low rounded-2xl relative overflow-hidden">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full border-4 border-primary border-t-transparent flex items-center justify-center">
+                                    <span class="text-xs font-black text-primary">94%</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-on-surface-variant tracking-tighter">Line Efficiency</p>
+                                    <p class="text-sm font-bold text-on-surface">Peak Reliability</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-on-surface-variant leading-relaxed">System tracking shows optimal transit rhythm for XP-2402. No congestion predicted for the next 45 minutes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Shell -->
+        <footer class="w-full py-12 mt-12 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 flex flex-col md:flex-row justify-between items-center px-10 gap-6">
+            <div class="space-y-1">
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">TransitPulse</p>
+                <p class="text-xs text-slate-400">© 2024 TransitPulse Precision Tracking. All rights reserved.</p>
+            </div>
+            <div class="flex gap-8">
+                <a class="text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+                <a class="text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+                <a class="text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Campus Map</a>
+                <a class="text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">System Status</a>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // ── Live Vehicle Telemetry Simulation ──────────────────────────────────
+        let speed = 42, battery = 88;
+        let networkState = 'good'; // good | degraded | offline
+        let updateHz = 1000; // adaptive update frequency ms
+        let telemetryTimer;
+
+        const etaStops = [
+            { name: 'Main Terminal Hub',  time: null,    status: 'current' },
+            { name: 'Financial District', time: '14:04', status: 'upcoming' },
+            { name: 'Old Town East',      time: '14:12', status: 'future' },
+            { name: 'Science Park',       time: '14:28', status: 'future' },
+            { name: 'Grand Plaza',        time: '14:45', status: 'future' },
+        ];
+
+        function updateTelemetry() {
+            // Speed: random walk ±5 km/h, clamp 0–80
+            speed = Math.max(0, Math.min(80, speed + (Math.random() - 0.5) * 10));
+            document.getElementById('speed-val').textContent = Math.round(speed);
+
+            // Battery: slow drain
+            battery = Math.max(0, battery - 0.05);
+            document.getElementById('battery-val').textContent = Math.round(battery);
+
+            // Adaptive network simulation
+            const r = Math.random();
+            if (r < 0.05)      setNetworkState('offline');
+            else if (r < 0.15) setNetworkState('degraded');
+            else               setNetworkState('good');
+
+            // Update ETA times (count down)
+            etaStops.forEach((s, i) => {
+                if (s.time) {
+                    const [h, m] = s.time.split(':').map(Number);
+                    const d = new Date(); d.setHours(h, m, 0);
+                    const diff = Math.round((d - new Date()) / 60000);
+                    if (diff > 0) s.displayTime = `${diff} min`;
+                    else s.displayTime = s.time;
+                }
+            });
+        }
+
+        function setNetworkState(state) {
+            if (networkState === state) return;
+            networkState = state;
+
+            const icon = document.getElementById('net-icon');
+            const dot  = document.getElementById('net-dot');
+            const label = document.getElementById('net-status');
+
+            clearInterval(telemetryTimer);
+
+            if (state === 'offline') {
+                icon.textContent = 'wifi_off';
+                icon.className = 'material-symbols-outlined text-error';
+                dot.className = 'w-3 h-3 rounded-full bg-error';
+                label.textContent = 'Offline';
+                updateHz = 0;
+            } else if (state === 'degraded') {
+                icon.textContent = 'signal_cellular_connected_no_internet_4_bar';
+                icon.className = 'material-symbols-outlined text-tertiary';
+                dot.className = 'w-3 h-3 rounded-full bg-tertiary animate-pulse';
+                label.textContent = 'Latency Alert';
+                updateHz = 3000;
+            } else {
+                icon.textContent = 'wifi';
+                icon.className = 'material-symbols-outlined text-primary';
+                dot.className = 'w-3 h-3 rounded-full bg-primary animate-pulse';
+                label.textContent = 'Connected';
+                updateHz = 1000;
+            }
+
+            if (updateHz > 0) {
+                telemetryTimer = setInterval(updateTelemetry, updateHz);
+            }
+        }
+
+        // Start
+        setNetworkState('good');
+    </script>
+
+</body>
+</html>
