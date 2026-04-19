@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TransitPulse Admin | Network Simulation</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#adc7ff",
+                        "primary": "#0059bb",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "outline-variant": "#c1c6d7",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#004964",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001a41",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "secondary-fixed": "#c3e8ff",
+                        "surface-tint": "#005bc0",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#001e2c",
+                        "secondary": "#00668a",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-surface": "#0b1c30",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#9e3d00",
+                        "on-primary-container": "#fefcff",
+                        "primary-container": "#0070ea",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed-dim": "#7ad0ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#c64f00",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#00bdfd",
+                        "on-surface-variant": "#414754",
+                        "outline": "#717786",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#351000",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-fixed-variant": "#7c2e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(248, 249, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .ambient-shadow {
+            box-shadow: 0 24px 40px -8px rgba(11, 28, 48, 0.06);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #0059bb;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+    <!-- SideNavBar Shell -->
+    <nav class="h-screen w-64 fixed left-0 top-0 bg-slate-50 flex flex-col p-4 gap-2 z-50">
+        <div class="flex flex-col mb-8 px-2">
+            <span class="text-lg font-bold text-blue-900">TransitPulse</span>
+            <span class="text-xs font-medium text-slate-500">Precision Pulse v2.4</span>
+        </div>
+        <div class="flex flex-col gap-1 flex-1">
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50/50 hover:translate-x-1 transition-all duration-300 rounded-xl" href="dashboard.html">
+                <span class="material-symbols-outlined">grid_view</span>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50/50 hover:translate-x-1 transition-all duration-300 rounded-xl" href="live-map.html">
+                <span class="material-symbols-outlined">explore</span>
+                <span class="font-medium text-sm">Live Map</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50/50 hover:translate-x-1 transition-all duration-300 rounded-xl" href="vehicle-detail.html">
+                <span class="material-symbols-outlined">directions_bus</span>
+                <span class="font-medium text-sm">Vehicles</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 bg-white text-blue-700 shadow-sm rounded-xl font-medium text-sm" href="admin.html">
+                <span class="material-symbols-outlined">settings_accessibility</span>
+                <span class="font-medium text-sm">Admin</span>
+            </a>
+        </div>
+        <div class="mt-auto flex flex-col gap-1 border-t border-slate-100 pt-4">
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50/50 rounded-xl" href="#">
+                <span class="material-symbols-outlined">help_outline</span>
+                <span class="font-medium text-sm">Support</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50/50 rounded-xl" href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-medium text-sm">Settings</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Canvas -->
+    <main class="ml-64 min-h-screen">
+        <!-- TopAppBar Header -->
+        <header class="flex justify-between items-center px-8 py-4 sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm">
+            <div class="flex items-center gap-4">
+                <h1 class="text-xl font-black tracking-tighter text-blue-700">Network Simulation</h1>
+                <div class="h-4 w-px bg-outline-variant/30"></div>
+                <div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span class="text-xs font-bold text-on-primary-fixed-variant uppercase tracking-widest">Active Simulation</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
+                    <span class="material-symbols-outlined text-slate-400">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-48" placeholder="Search logs..." type="text"/>
+                </div>
+                <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-all">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="w-8 h-8 rounded-full overflow-hidden">
+                    <img alt="Administrator Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGk8Rh5a_aWleRtZXQkppVi-OXX7hxShPOZ7rn6iQ1lJ-x7ebwPQTORIoh-n4ZhhTQxovUBPfpptfQ7sd_MQR8G36jP_m9H0FQdXG5la9kVzaTEQJGhgcWdxC4ZpqxpzVZfkVlK4f-io2FOHvgdGoYJPZlzDHbqNV65WdS5GkOWuzoZ3hwCL7nEdrhGYteuKOPH-G_LEZ74O23QIUyqQ1FVwBGa9q6e9Qu42GzP5v6-IjjLr1vXeYZp6zZ4i3mEvtVKMdkAyu9NQE"/>
+                </div>
+            </div>
+        </header>
+
+        <!-- Simulation Grid -->
+        <div class="p-8 max-w-7xl mx-auto grid grid-cols-12 gap-8">
+            <!-- Simulation Controls (Bento Card) -->
+            <div class="col-span-12 lg:col-span-5 flex flex-col gap-6">
+                <section class="bg-surface-container-lowest p-8 rounded-xl ambient-shadow flex flex-col gap-8">
+                    <div>
+                        <h2 class="text-lg font-bold mb-2">Network Topology</h2>
+                        <p class="text-sm text-on-surface-variant">Define the simulated environment for edge devices.</p>
+                    </div>
+
+                    <!-- Network Toggles -->
+                    <div class="grid grid-cols-3 gap-3" id="topology-btns">
+                        <button onclick="setTopology('normal')" class="topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-primary bg-surface-container-low text-primary transition-all" data-mode="normal">
+                            <span class="material-symbols-outlined mb-2">speed</span>
+                            <span class="text-xs font-bold">Normal</span>
+                        </button>
+                        <button onclick="setTopology('slow')" class="topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-surface-container-low text-on-surface-variant hover:border-outline-variant transition-all" data-mode="slow">
+                            <span class="material-symbols-outlined mb-2">hourglass_empty</span>
+                            <span class="text-xs font-bold">Slow</span>
+                        </button>
+                        <button onclick="setTopology('offline')" class="topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-surface-container-low text-on-surface-variant hover:border-outline-variant transition-all" data-mode="offline">
+                            <span class="material-symbols-outlined mb-2">signal_disconnected</span>
+                            <span class="text-xs font-bold">No Network</span>
+                        </button>
+                    </div>
+
+                    <!-- Latency Slider -->
+                    <div class="flex flex-col gap-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-bold text-on-surface">Target Latency</span>
+                            <span class="text-sm font-black text-primary" id="latency-display">240ms</span>
+                        </div>
+                        <input class="w-full h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer" type="range" id="latency-slider" min="0" max="1000" value="240" oninput="updateLatency(this.value)"/>
+                        <div class="flex justify-between text-[10px] font-bold text-outline uppercase tracking-wider">
+                            <span>0ms</span>
+                            <span>500ms</span>
+                            <span>1000ms</span>
+                        </div>
+                    </div>
+
+                    <!-- System State Indicators -->
+                    <div class="flex flex-col gap-4 pt-4 border-t border-surface-container-low">
+                        <span class="text-xs font-bold text-outline uppercase tracking-widest">Real-time State</span>
+                        <div class="grid grid-cols-1 gap-3" id="state-indicators">
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low" id="state-sending">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(0,89,187,0.4)]"></span>
+                                    <span class="text-sm font-medium">Sending</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-primary font-bold">ACTIVE</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low opacity-50" id="state-buffered">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+                                    <span class="text-sm font-medium">Buffered</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-on-surface-variant font-bold" id="buffer-count">WAITING</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low" id="state-reconnected">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-primary-fixed-dim"></span>
+                                    <span class="text-sm font-medium">Reconnected</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-primary-fixed-dim font-bold">READY</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Health Gauge (Signature Component) -->
+                <section class="bg-surface-container-lowest p-8 rounded-xl ambient-shadow flex flex-col items-center">
+                    <div class="relative w-48 h-48 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle class="text-surface-container-low" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+                            <circle cx="96" cy="96" fill="transparent" r="88" stroke="url(#health-gradient)" stroke-dasharray="552.9" stroke-dashoffset="110" stroke-linecap="round" stroke-width="12"></circle>
+                            <defs>
+                                <linearGradient id="health-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color: #0059bb"></stop>
+                                    <stop offset="100%" style="stop-color: #0070ea"></stop>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-4xl font-black text-on-surface tracking-tighter">94%</span>
+                            <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Resilience Index</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Terminal Log Panel -->
+            <div class="col-span-12 lg:col-span-7">
+                <section class="bg-inverse-surface h-full rounded-xl flex flex-col overflow-hidden shadow-2xl">
+                    <!-- Terminal Header -->
+                    <div class="bg-slate-800/50 px-6 py-3 flex items-center justify-between border-b border-white/5">
+                        <div class="flex items-center gap-2">
+                            <div class="flex gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                            </div>
+                            <span class="ml-4 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-widest">System_Logs_v2.4</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-[10px] font-mono text-primary-fixed-dim">UPTIME: 4h 12m 04s</span>
+                            <button class="text-slate-400 hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-sm">download</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Content -->
+                    <div class="flex-1 p-6 font-mono text-sm overflow-y-auto space-y-3" id="terminal-log">
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:22:01]</span>
+                            <span class="text-primary-fixed-dim shrink-0">INFO</span>
+                            <span class="text-slate-200">System heartbeat initialized on node cluster-7.</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:22:05]</span>
+                            <span class="text-primary-fixed-dim shrink-0">INFO</span>
+                            <span class="text-slate-200">Handshake protocol established with 142 vehicles.</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:22:08]</span>
+                            <span class="text-tertiary-fixed-dim shrink-0">WARN</span>
+                            <span class="text-slate-200 italic">Latency spike detected in Subsector B (240ms target).</span>
+                        </div>
+                        <div class="flex gap-4 bg-primary/10 -mx-6 px-6 py-1">
+                            <span class="text-slate-500 shrink-0">[14:23:12]</span>
+                            <span class="text-primary-fixed-dim shrink-0">SEND</span>
+                            <span class="text-blue-300">Packet 0xAF42 successfully dispatched to Bus ID: 4492.</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:23:15]</span>
+                            <span class="text-primary-fixed-dim shrink-0">INFO</span>
+                            <span class="text-slate-200">Buffer state: 0% full. Optimizing throughput.</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:24:01]</span>
+                            <span class="text-primary-fixed-dim shrink-0">INFO</span>
+                            <span class="text-slate-200">Recalibrating drift compensation for GPS modules.</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:24:45]</span>
+                            <span class="text-primary-fixed-dim shrink-0">INFO</span>
+                            <span class="text-slate-200">Reconnected successfully to Node #12. Handshake clear.</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-slate-500 shrink-0">[14:25:02]</span>
+                            <span class="text-slate-200 animate-pulse">_</span>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Input -->
+                    <div class="bg-slate-900/50 p-4 border-t border-white/5 flex items-center gap-3">
+                        <span class="text-primary-fixed-dim font-bold font-mono">$</span>
+                        <input class="bg-transparent border-none focus:ring-0 text-sm font-mono text-slate-300 w-full placeholder:text-slate-600" placeholder="Enter diagnostic command..." type="text"/>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Dashboard Stats Layer -->
+            <div class="col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                <div class="bg-surface-container-low p-6 rounded-xl">
+                    <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1 block">Throughput</span>
+                    <div class="flex items-end gap-2">
+                        <span class="text-2xl font-black text-on-surface">42.8 <span class="text-xs font-normal">MB/s</span></span>
+                        <span class="text-xs font-bold text-primary mb-1">+12%</span>
+                    </div>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl">
+                    <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1 block">Active Nodes</span>
+                    <div class="flex items-end gap-2">
+                        <span class="text-2xl font-black text-on-surface">1,204</span>
+                        <span class="text-xs font-bold text-on-surface-variant mb-1">STABLE</span>
+                    </div>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl">
+                    <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1 block">Packet Loss</span>
+                    <div class="flex items-end gap-2">
+                        <span class="text-2xl font-black text-on-surface">0.02%</span>
+                        <span class="text-xs font-bold text-primary mb-1">OPTIMAL</span>
+                    </div>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl">
+                    <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1 block">Encryption</span>
+                    <div class="flex items-end gap-2">
+                        <span class="text-2xl font-black text-on-surface">AES-256</span>
+                        <span class="text-xs font-bold text-primary mb-1">SECURE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="w-full py-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center px-10 gap-6">
+            <span class="text-sm font-bold text-slate-900">TransitPulse</span>
+            <span class="text-xs text-slate-400">© 2024 TransitPulse Precision Tracking. All rights reserved.</span>
+            <div class="flex gap-6">
+                <a class="text-xs text-slate-400 hover:text-blue-500 transition-opacity" href="#">Privacy Policy</a>
+                <a class="text-xs text-slate-400 hover:text-blue-500 transition-opacity" href="#">Terms of Service</a>
+                <a class="text-xs text-slate-400 hover:text-blue-500 transition-opacity" href="#">System Status</a>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // ── Admin Network Simulation Controls ──────────────────────────────────
+
+        let currentMode = 'normal';
+        let latency = 240;
+        let bufferCount = 0;
+        let uptimeSeconds = 0;
+        let logLines = [];
+
+        const logTemplates = {
+            normal: [
+                (t) => `[${t}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">Heartbeat OK — all nodes responding.</span>`,
+                (t) => `[${t}] <span class="text-primary-fixed-dim">SEND</span> <span class="text-blue-300">Packet 0x${Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase()} dispatched to Bus ID: ${Math.floor(Math.random()*9000+1000)}.</span>`,
+                (t) => `[${t}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">Buffer state: 0% full. Throughput optimal.</span>`,
+                (t) => `[${t}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">ETA recalculated for ${Math.floor(Math.random()*14+1)} vehicles.</span>`,
+            ],
+            slow: [
+                (t) => `[${t}] <span class="text-tertiary-fixed-dim">WARN</span> <span class="text-slate-200 italic">Latency spike: ${latency}ms on Subsector B.</span>`,
+                (t) => `[${t}] <span class="text-tertiary-fixed-dim">WARN</span> <span class="text-slate-200 italic">Adaptive mode active — reducing update frequency.</span>`,
+                (t) => `[${t}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">Buffering ${++bufferCount} packets pending flush.</span>`,
+            ],
+            offline: [
+                (t) => `[${t}] <span class="text-red-400">ERROR</span> <span class="text-slate-200">Connection lost — entering offline buffer mode.</span>`,
+                (t) => `[${t}] <span class="text-tertiary-fixed-dim">WARN</span> <span class="text-slate-200 italic">Storing GPS packet locally (buffer: ${bufferCount} items).</span>`,
+                (t) => `[${t}] <span class="text-red-400">ERROR</span> <span class="text-slate-200">No ACK from node cluster-7. Retrying...</span>`,
+            ],
+        };
+
+        function timestamp() {
+            return new Date().toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        function addLog(html) {
+            const log = document.getElementById('terminal-log');
+            if (!log) return;
+            const div = document.createElement('div');
+            div.className = 'flex gap-4';
+            div.innerHTML = html;
+            log.appendChild(div);
+            // Keep last 40 lines
+            while (log.children.length > 40) log.removeChild(log.firstChild);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateUptime() {
+            uptimeSeconds++;
+            const h = Math.floor(uptimeSeconds / 3600);
+            const m = Math.floor((uptimeSeconds % 3600) / 60);
+            const s = uptimeSeconds % 60;
+            const el = document.querySelector('.text-primary-fixed-dim.font-mono');
+            if (el) el.textContent = `UPTIME: ${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+        }
+
+        function updateStateIndicators() {
+            const sending    = document.getElementById('state-sending');
+            const buffered   = document.getElementById('state-buffered');
+            const reconnected = document.getElementById('state-reconnected');
+            const bufLabel   = document.getElementById('buffer-count');
+
+            if (currentMode === 'normal') {
+                sending.classList.remove('opacity-50');
+                buffered.classList.add('opacity-50');
+                reconnected.classList.remove('opacity-50');
+                if (bufLabel) bufLabel.textContent = 'WAITING';
+                bufferCount = 0;
+            } else if (currentMode === 'slow') {
+                sending.classList.remove('opacity-50');
+                buffered.classList.remove('opacity-50');
+                reconnected.classList.add('opacity-50');
+                if (bufLabel) bufLabel.textContent = `${bufferCount} PKT`;
+            } else {
+                sending.classList.add('opacity-50');
+                buffered.classList.remove('opacity-50');
+                reconnected.classList.add('opacity-50');
+                bufferCount++;
+                if (bufLabel) bufLabel.textContent = `${bufferCount} PKT`;
+            }
+        }
+
+        function setTopology(mode) {
+            currentMode = mode;
+            if (mode === 'normal') bufferCount = 0;
+
+            // Update button styles
+            document.querySelectorAll('.topo-btn').forEach(btn => {
+                if (btn.dataset.mode === mode) {
+                    btn.className = 'topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-primary bg-surface-container-low text-primary transition-all';
+                } else {
+                    btn.className = 'topo-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-surface-container-low text-on-surface-variant hover:border-outline-variant transition-all';
+                }
+            });
+
+            // Log the change
+            const msgs = { normal: 'Network topology set to NORMAL.', slow: `Network topology set to SLOW (${latency}ms latency).`, offline: 'Network topology set to OFFLINE — buffer mode engaged.' };
+            addLog(`[${timestamp()}] <span class="text-primary-fixed-dim">SYS</span> <span class="text-yellow-300">${msgs[mode]}</span>`);
+            updateStateIndicators();
+        }
+
+        function updateLatency(val) {
+            latency = parseInt(val);
+            document.getElementById('latency-display').textContent = latency + 'ms';
+            if (currentMode === 'slow') {
+                addLog(`[${timestamp()}] <span class="text-tertiary-fixed-dim">WARN</span> <span class="text-slate-200 italic">Latency target updated to ${latency}ms.</span>`);
+            }
+        }
+
+        // Terminal input
+        document.querySelector('#terminal-log').closest('section').querySelector('input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                addLog(`[${timestamp()}] <span class="text-green-400">CMD</span> <span class="text-slate-300">${this.value}</span>`);
+                setTimeout(() => {
+                    addLog(`[${timestamp()}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">Command acknowledged. Processing...</span>`);
+                }, 400);
+                this.value = '';
+            }
+        });
+
+        // Periodic log streaming
+        setInterval(() => {
+            const templates = logTemplates[currentMode] || logTemplates.normal;
+            const tpl = templates[Math.floor(Math.random() * templates.length)];
+            addLog(tpl(timestamp()));
+            updateStateIndicators();
+            updateUptime();
+        }, 1500);
+
+        // Seed initial logs
+        ['System heartbeat initialized on node cluster-7.',
+         'Handshake protocol established with 142 vehicles.',
+         'GPS drift compensation active on all modules.'].forEach((msg, i) => {
+            setTimeout(() => addLog(`[${timestamp()}] <span class="text-primary-fixed-dim">INFO</span> <span class="text-slate-200">${msg}</span>`), i * 200);
+        });
+    </script>
+
+</body>
+</html>

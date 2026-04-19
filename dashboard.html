@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TransitPulse | Precision Tracking Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#adc7ff",
+                        "primary": "#0059bb",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "outline-variant": "#c1c6d7",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#004964",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001a41",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "secondary-fixed": "#c3e8ff",
+                        "surface-tint": "#005bc0",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#001e2c",
+                        "secondary": "#00668a",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-surface": "#0b1c30",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#9e3d00",
+                        "on-primary-container": "#fefcff",
+                        "primary-container": "#0070ea",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed-dim": "#7ad0ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#c64f00",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#00bdfd",
+                        "on-surface-variant": "#414754",
+                        "outline": "#717786",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#351000",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-fixed-variant": "#7c2e00"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ambient-shadow { shadow: 0 8px 30px rgba(11, 28, 48, 0.04); }
+        .primary-gradient { background: linear-gradient(135deg, #0059bb 0%, #0070ea 100%); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d3e4fe; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+
+    <!-- TopNavBar (Medium Variant) -->
+    <header class="full-width sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm">
+        <div class="flex justify-between items-center px-8 py-3 max-w-full">
+            <div class="flex items-center gap-8">
+                <span class="text-xl font-black tracking-tighter text-primary">TransitPulse</span>
+                <nav class="hidden md:flex gap-6 items-center">
+                    <a class="text-blue-600 font-bold font-['Inter'] text-sm" href="dashboard.html">Dashboard</a>
+                    <a class="text-slate-400 font-['Inter'] text-sm hover:text-blue-600 transition-all duration-200" href="live-map.html">Live Map</a>
+                    <a class="text-slate-400 font-['Inter'] text-sm hover:text-blue-600 transition-all duration-200" href="vehicle-detail.html">Vehicles</a>
+                    <a class="text-slate-400 font-['Inter'] text-sm hover:text-blue-600 transition-all duration-200" href="admin.html">Admin</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative flex items-center bg-surface-container-low rounded-xl px-3 py-1.5 focus-within:bg-surface-container-lowest transition-all group">
+                    <span class="material-symbols-outlined text-outline text-lg">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-medium placeholder:text-outline" placeholder="Search routes or IDs..." type="text"/>
+                </div>
+                <button class="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-all duration-200 relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+                </button>
+                <button class="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-all duration-200">
+                    <span class="material-symbols-outlined">history_toggle_off</span>
+                </button>
+                <div class="h-8 w-px bg-outline-variant/30 mx-2"></div>
+                <div class="flex items-center gap-3 pl-2">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-on-surface">Admin Pulse</p>
+                        <p class="text-[10px] text-on-surface-variant font-medium">System Manager</p>
+                    </div>
+                    <img alt="Administrator Profile" class="w-10 h-10 rounded-xl object-cover ring-2 ring-surface-container-high" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCudLa0tBS4gxLKNkcjWM4hKK7PZEYPB3mr3Hc16qWW-i7vpD8p2Wan4uy8YZQBXJzk4ai5WbKxkC9xpAnphlJni2EndVC783sx9Uh3laaGKwKMHRtaZ90twdzClUWlKTNm-9MHjLtWpN60WP5mILC4k7KzASGEZxHxn6VWvc6rQem-Hq1sOEhUGhLgcelTFx5cjjn7yrnsu6Ej6K6_2LetPKilPP7nmbjWJq3m4Zc0g5CoN436oQN3OS1BYZwBdkmrPawM3iynIJU"/>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto p-8 gap-8 flex flex-col">
+
+        <!-- Dashboard Header -->
+        <div class="flex justify-between items-end">
+            <div>
+                <p class="text-sm font-semibold text-primary uppercase tracking-widest mb-1">Network Overview</p>
+                <h1 class="text-3xl font-extrabold tracking-tight text-on-surface">Precision Pulse Dashboard</h1>
+            </div>
+            <div class="flex gap-3">
+                <button class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-surface-container-low text-primary font-bold text-sm hover:translate-x-1 transition-all duration-300">
+                    <span class="material-symbols-outlined text-lg">download</span>
+                    Export Data
+                </button>
+                <button class="flex items-center gap-2 px-6 py-2.5 rounded-full primary-gradient text-on-primary font-bold text-sm shadow-[0_0_15px_rgba(0,89,187,0.3)] hover:scale-[1.02] active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    Register Vehicle
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Bento Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Active Buses Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(11,28,48,0.04)] hover:translate-y-[-4px] transition-all duration-300 group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-primary-fixed-dim/30 text-primary">
+                        <span class="material-symbols-outlined text-2xl" data-weight="fill">directions_bus</span>
+                    </div>
+                    <span class="text-xs font-bold text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-lg">+12.5%</span>
+                </div>
+                <p class="text-on-surface-variant text-sm font-medium">Total Active Buses</p>
+                <h3 class="text-4xl font-extrabold tracking-tighter text-on-surface mt-1">1,284</h3>
+                <div class="mt-4 w-full h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+                    <div class="h-full bg-primary rounded-full" style="width: 85%;"></div>
+                </div>
+            </div>
+
+            <!-- Online Status Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(11,28,48,0.04)] hover:translate-y-[-4px] transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-secondary-fixed-dim/30 text-secondary">
+                        <span class="material-symbols-outlined text-2xl" data-weight="fill">wifi_tethering</span>
+                    </div>
+                    <span class="flex items-center gap-1 text-xs font-bold text-primary">
+                        <span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                        Live
+                    </span>
+                </div>
+                <p class="text-on-surface-variant text-sm font-medium">Buses Online</p>
+                <h3 class="text-4xl font-extrabold tracking-tighter text-on-surface mt-1">1,242</h3>
+                <p class="text-xs text-on-surface-variant mt-3 italic font-medium">96.7% operational efficiency</p>
+            </div>
+
+            <!-- Network Status Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(11,28,48,0.04)] hover:translate-y-[-4px] transition-all duration-300" id="network-status-card">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-surface-container-highest text-primary">
+                        <span class="material-symbols-outlined text-2xl">health_metrics</span>
+                    </div>
+                    <span class="net-badge text-xs font-bold text-primary bg-primary-fixed px-2 py-1 rounded-lg">Low Latency</span>
+                </div>
+                <p class="text-on-surface-variant text-sm font-medium">Network Status</p>
+                <h3 class="text-4xl font-extrabold tracking-tighter text-on-surface mt-1 net-label">Optimal</h3>
+                <div class="flex gap-1 mt-4">
+                    <div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+                    <div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+                    <div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+                    <div class="h-1.5 flex-1 bg-primary rounded-full opacity-40"></div>
+                </div>
+            </div>
+
+            <!-- ETA Accuracy Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(11,28,48,0.04)] hover:translate-y-[-4px] transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-tertiary-fixed/30 text-tertiary">
+                        <span class="material-symbols-outlined text-2xl" data-weight="fill">schedule</span>
+                    </div>
+                </div>
+                <p class="text-on-surface-variant text-sm font-medium">Avg ETA Accuracy</p>
+                <h3 class="text-4xl font-extrabold tracking-tighter text-on-surface mt-1">98.2<span class="text-xl">%</span></h3>
+                <p class="text-xs text-on-surface-variant mt-3 font-medium">± 12 seconds variance</p>
+            </div>
+        </section>
+
+        <!-- Main Content Area: Table and Map -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <!-- Main Table Section -->
+            <div class="xl:col-span-2 bg-surface-container-lowest rounded-[2rem] shadow-[0_8px_30px_rgb(11,28,48,0.02)] overflow-hidden flex flex-col">
+                <div class="px-8 py-6 flex justify-between items-center bg-surface-container-low/50 backdrop-blur-sm">
+                    <h2 class="text-xl font-extrabold tracking-tight text-on-surface">Fleet Monitoring</h2>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-white text-xs font-bold rounded-xl shadow-sm border border-outline-variant/10">All Units</button>
+                        <button class="px-4 py-2 text-on-surface-variant text-xs font-bold rounded-xl hover:bg-white transition-all">Delays Only</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low/30">
+                                <th class="px-8 py-4 text-[10px] font-black uppercase tracking-[0.1em] text-on-surface-variant">Bus Number</th>
+                                <th class="px-8 py-4 text-[10px] font-black uppercase tracking-[0.1em] text-on-surface-variant">Route</th>
+                                <th class="px-8 py-4 text-[10px] font-black uppercase tracking-[0.1em] text-on-surface-variant">Status</th>
+                                <th class="px-8 py-4 text-[10px] font-black uppercase tracking-[0.1em] text-on-surface-variant">ETA</th>
+                                <th class="px-8 py-4 text-[10px] font-black uppercase tracking-[0.1em] text-on-surface-variant">Last Updated</th>
+                                <th class="px-8 py-4"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-transparent" id="fleet-tbody">
+                            <!-- Row 1 -->
+                            <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">#402</div>
+                                        <span class="text-sm font-bold text-on-surface">TRANS-402-B</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5"><span class="text-sm font-medium text-on-surface-variant">Northside Express</span></td>
+                                <td class="px-8 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-black uppercase tracking-wider">
+                                        <span class="w-1 h-1 bg-primary rounded-full mr-1.5 animate-pulse"></span>Live
+                                    </span>
+                                </td>
+                                <td class="px-8 py-5 text-sm font-bold text-primary">2 min</td>
+                                <td class="px-8 py-5 text-xs text-on-surface-variant">Just now</td>
+                                <td class="px-8 py-5 text-right">
+                                    <button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+                                </td>
+                            </tr>
+                            <!-- Row 2 -->
+                            <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-tertiary-fixed-dim/20 flex items-center justify-center text-tertiary font-bold text-xs">#158</div>
+                                        <span class="text-sm font-bold text-on-surface">TRANS-158-A</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5"><span class="text-sm font-medium text-on-surface-variant">Central Loop</span></td>
+                                <td class="px-8 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-error-container text-error text-[10px] font-black uppercase tracking-wider">Delayed</span>
+                                </td>
+                                <td class="px-8 py-5 text-sm font-bold text-error">14 min</td>
+                                <td class="px-8 py-5 text-xs text-on-surface-variant">3 min ago</td>
+                                <td class="px-8 py-5 text-right">
+                                    <button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+                                </td>
+                            </tr>
+                            <!-- Row 3 -->
+                            <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant font-bold text-xs">#771</div>
+                                        <span class="text-sm font-bold text-on-surface">TRANS-771-X</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5"><span class="text-sm font-medium text-on-surface-variant">Airport Shuttle</span></td>
+                                <td class="px-8 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-black uppercase tracking-wider">Offline</span>
+                                </td>
+                                <td class="px-8 py-5 text-sm font-bold text-on-surface-variant">--</td>
+                                <td class="px-8 py-5 text-xs text-on-surface-variant">12 min ago</td>
+                                <td class="px-8 py-5 text-right">
+                                    <button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+                                </td>
+                            </tr>
+                            <!-- Row 4 -->
+                            <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">#229</div>
+                                        <span class="text-sm font-bold text-on-surface">TRANS-229-C</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5"><span class="text-sm font-medium text-on-surface-variant">Riverfront Way</span></td>
+                                <td class="px-8 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-black uppercase tracking-wider">
+                                        <span class="w-1 h-1 bg-primary rounded-full mr-1.5"></span>Live
+                                    </span>
+                                </td>
+                                <td class="px-8 py-5 text-sm font-bold text-primary">On Time</td>
+                                <td class="px-8 py-5 text-xs text-on-surface-variant">Just now</td>
+                                <td class="px-8 py-5 text-right">
+                                    <button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+                                </td>
+                            </tr>
+                            <!-- Row 5 -->
+                            <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">#310</div>
+                                        <span class="text-sm font-bold text-on-surface">TRANS-310-M</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5"><span class="text-sm font-medium text-on-surface-variant">Downtown Hub</span></td>
+                                <td class="px-8 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-black uppercase tracking-wider">
+                                        <span class="w-1 h-1 bg-primary rounded-full mr-1.5"></span>Live
+                                    </span>
+                                </td>
+                                <td class="px-8 py-5 text-sm font-bold text-primary">5 min</td>
+                                <td class="px-8 py-5 text-xs text-on-surface-variant">1 min ago</td>
+                                <td class="px-8 py-5 text-right">
+                                    <button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-6 border-t border-outline-variant/10 text-center">
+                    <button class="text-sm font-bold text-primary hover:underline">View All 1,284 Vehicles</button>
+                </div>
+            </div>
+
+            <!-- Side Resilience Tracking Map Section -->
+            <div class="flex flex-col gap-8">
+                <!-- Map Card -->
+                <div class="bg-surface-container-lowest p-2 rounded-[2rem] shadow-[0_8px_30px_rgb(11,28,48,0.02)] h-[400px] relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-slate-200">
+                        <img alt="Digital urban map interface" class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkhX5m38pGn_3-xpAA1a6EFY94rBJQdhAuE2nBp0e-mp10_rDCSRJ7xufEcPiQX0D1RbLC9ueRSdxcToT-5Zm42NLlA556sAgrw_zaM13jMAVwNHwljlfkkTyQ6ihAp9-GoT0DTjNUJg6l8gmKzF6EmbEJO9IP_FoqBzSDhAZbe-VhnBcvdiPHD2_eVpzj_8PLat1LaQFgCfGNmk2RsIUvBeqqUPLLWccQT6RW6sHlbSdXQdyz5AfJjL8Eu9IvXJ9j1FTjFN8KNj4"/>
+                    </div>
+                    <!-- Map Overlays -->
+                    <div class="absolute top-6 left-6 right-6 flex justify-between items-start">
+                        <div class="bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-white/50">
+                            <p class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Active Zone</p>
+                            <p class="text-sm font-bold text-on-surface">Central Metro Area</p>
+                        </div>
+                        <button class="p-3 bg-white shadow-lg rounded-full text-primary">
+                            <span class="material-symbols-outlined">fullscreen</span>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-6 left-6 right-6">
+                        <div class="bg-primary-container text-on-primary-container p-4 rounded-2xl shadow-xl flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-sm">my_location</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold opacity-80 uppercase tracking-wider">Tracking</p>
+                                    <p class="text-xs font-black">42 Vehicles in Focus</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resilience Gauge (Signature Component) -->
+                <div class="bg-surface-container-lowest p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(11,28,48,0.02)] flex flex-col items-center text-center">
+                    <div class="relative w-48 h-48 flex items-center justify-center mb-6">
+                        <!-- Custom SVG Gauge -->
+                        <svg class="w-full h-full -rotate-90">
+                            <circle cx="96" cy="96" fill="none" r="88" stroke="#eff4ff" stroke-width="12"></circle>
+                            <circle cx="96" cy="96" fill="none" r="88" stroke="url(#gauge-gradient)" stroke-dasharray="552" stroke-dashoffset="55" stroke-linecap="round" stroke-width="12"></circle>
+                            <defs>
+                                <linearGradient id="gauge-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#0059bb"></stop>
+                                    <stop offset="100%" style="stop-color:#00bdfd"></stop>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute flex flex-col items-center">
+                            <span class="text-4xl font-black tracking-tighter text-on-surface">92<span class="text-lg opacity-50">%</span></span>
+                            <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Health</span>
+                        </div>
+                    </div>
+                    <h4 class="text-lg font-extrabold text-on-surface mb-2">System Resilience</h4>
+                    <p class="text-sm text-on-surface-variant px-4">Network load is within optimal parameters. Redundancy protocols are active on all main sectors.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-12 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 mt-12">
+        <div class="flex flex-col md:flex-row justify-between items-center px-10 gap-6 max-w-7xl mx-auto">
+            <div class="flex flex-col items-center md:items-start gap-2">
+                <span class="text-sm font-bold text-slate-900 dark:text-slate-100">TransitPulse</span>
+                <p class="font-['Inter'] text-xs text-slate-400">© 2024 TransitPulse Precision Tracking. All rights reserved.</p>
+            </div>
+            <div class="flex gap-8">
+                <a class="font-['Inter'] text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+                <a class="font-['Inter'] text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+                <a class="font-['Inter'] text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Campus Map</a>
+                <a class="font-['Inter'] text-xs text-slate-400 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">System Status</a>
+            </div>
+            <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">language</span>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">share</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ── Live Dashboard Simulation ──────────────────────────────────────────
+        // Simulates WebSocket-driven real-time updates for stats and fleet table
+
+        const fleetData = [
+            { id: 'TRANS-402-B', route: 'Northside Express', status: 'live', eta: 2 },
+            { id: 'TRANS-158-A', route: 'Central Loop',      status: 'delayed', eta: 14 },
+            { id: 'TRANS-771-X', route: 'Airport Shuttle',   status: 'offline', eta: null },
+            { id: 'TRANS-229-C', route: 'Riverfront Way',    status: 'live', eta: 0 },
+            { id: 'TRANS-310-M', route: 'Downtown Hub',      status: 'live', eta: 5 },
+        ];
+
+        // Network quality simulation
+        let networkQuality = 'good'; // good | degraded | offline
+        let offlineBuffer = 0;
+
+        function getNetworkBadge() {
+            if (networkQuality === 'good')     return '<span class="flex items-center gap-1 text-xs font-bold text-primary"><span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>Live</span>';
+            if (networkQuality === 'degraded') return '<span class="flex items-center gap-1 text-xs font-bold text-tertiary"><span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse"></span>Degraded</span>';
+            return '<span class="flex items-center gap-1 text-xs font-bold text-error"><span class="w-1.5 h-1.5 bg-error rounded-full"></span>Offline</span>';
+        }
+
+        function updateNetworkCard() {
+            const card = document.getElementById('network-status-card');
+            if (!card) return;
+            const labels = { good: 'Optimal', degraded: 'Degraded', offline: 'Offline' };
+            const badge  = { good: 'Low Latency', degraded: 'High Latency', offline: 'No Signal' };
+            const badgeColor = { good: 'text-primary bg-primary-fixed', degraded: 'text-tertiary bg-tertiary-fixed', offline: 'text-error bg-error-container/50' };
+            card.querySelector('.net-label').textContent = labels[networkQuality];
+            card.querySelector('.net-badge').textContent = badge[networkQuality];
+            card.querySelector('.net-badge').className = `net-badge text-xs font-bold px-2 py-1 rounded-lg ${badgeColor[networkQuality]}`;
+        }
+
+        function updateBufferIndicator() {
+            const el = document.getElementById('buffer-bar');
+            const label = document.getElementById('buffer-label');
+            if (!el) return;
+            el.style.width = offlineBuffer + '%';
+            if (label) label.textContent = offlineBuffer > 0 ? `Syncing ${Math.round(offlineBuffer * 0.5)} packets...` : 'All synced';
+        }
+
+        function tickSimulation() {
+            // Randomly drift ETAs
+            fleetData.forEach(v => {
+                if (v.status === 'live' && v.eta !== null) {
+                    v.eta = Math.max(0, v.eta + (Math.random() > 0.5 ? -1 : 1));
+                }
+                if (v.status === 'delayed') {
+                    v.eta = Math.max(1, v.eta + (Math.random() > 0.7 ? -1 : 0));
+                }
+            });
+
+            // Randomly shift network quality
+            const r = Math.random();
+            if (r < 0.05)      networkQuality = 'offline';
+            else if (r < 0.15) networkQuality = 'degraded';
+            else               networkQuality = 'good';
+
+            // Buffer fills when offline, drains when back
+            if (networkQuality === 'offline') offlineBuffer = Math.min(100, offlineBuffer + 8);
+            else offlineBuffer = Math.max(0, offlineBuffer - 5);
+
+            updateNetworkCard();
+            updateBufferIndicator();
+            updateTable();
+            updateTimestamp();
+        }
+
+        function statusBadge(status) {
+            if (status === 'live')    return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-black uppercase tracking-wider"><span class="w-1 h-1 bg-primary rounded-full mr-1.5 animate-pulse"></span>Live</span>`;
+            if (status === 'delayed') return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-error-container text-error text-[10px] font-black uppercase tracking-wider">Delayed</span>`;
+            return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-black uppercase tracking-wider">Offline</span>`;
+        }
+
+        function etaCell(v) {
+            if (v.status === 'offline') return `<span class="text-sm font-bold text-on-surface-variant">--</span>`;
+            if (v.eta === 0) return `<span class="text-sm font-bold text-primary">On Time</span>`;
+            return `<span class="text-sm font-bold ${v.status === 'delayed' ? 'text-error' : 'text-primary'}">${v.eta} min</span>`;
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('fleet-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = fleetData.map(v => `
+                <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">#${v.id.split('-')[1]}</div>
+                            <span class="text-sm font-bold text-on-surface">${v.id}</span>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5"><span class="text-sm font-medium text-on-surface-variant">${v.route}</span></td>
+                    <td class="px-8 py-5">${statusBadge(v.status)}</td>
+                    <td class="px-8 py-5">${etaCell(v)}</td>
+                    <td class="px-8 py-5 text-xs text-on-surface-variant" id="ts-${v.id}">Just now</td>
+                    <td class="px-8 py-5 text-right"><a href="vehicle-detail.html" class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</a></td>
+                </tr>`).join('');
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            const ts = now.toLocaleTimeString();
+            document.querySelectorAll('[id^="ts-"]').forEach(el => { el.textContent = ts; });
+        }
+
+        // Init
+        updateTable();
+        setInterval(tickSimulation, 2000);
+    </script>
