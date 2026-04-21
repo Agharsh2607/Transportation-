@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth-guard.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -116,7 +119,7 @@
         }
     </style>
 </head>
-<body class="bg-surface font-body text-on-surface antialiased">
+<body class="bg-surface font-body text-on-surface antialiased" data-allowed-roles="admin">
 
     <!-- Navigation Bar -->
     <header class="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm">

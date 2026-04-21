@@ -17,7 +17,8 @@ router.post('/stop', (req, res) => liveTrackingController.stopTracking(req, res)
 
 /**
  * GET /api/live/vehicles
- * Get all active vehicles
+ * Get all active vehicles.
+ * Supports optional bbox query: ?bbox=minLat,minLng,maxLat,maxLng
  */
 router.get('/vehicles', (req, res) => liveTrackingController.getActiveVehicles(req, res));
 

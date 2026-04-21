@@ -3,74 +3,40 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>TransitPulse | Authentication Suite</title>
+    <title>TransitPulse | Sign In</title>
+    <meta name="description" content="Sign in or create an account to access TransitPulse real-time bus tracking dashboard."/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                    "on-error-container": "#93000a",
-                    "error": "#ba1a1a",
-                    "inverse-surface": "#213145",
-                    "inverse-primary": "#adc7ff",
-                    "primary": "#0059bb",
-                    "tertiary-fixed-dim": "#ffb695",
-                    "outline-variant": "#c1c6d7",
-                    "on-primary": "#ffffff",
-                    "surface-container-high": "#dce9ff",
-                    "on-secondary-container": "#004964",
-                    "error-container": "#ffdad6",
-                    "on-primary-fixed": "#001a41",
-                    "surface": "#f8f9ff",
-                    "on-secondary-fixed-variant": "#004c69",
-                    "secondary-fixed": "#c3e8ff",
-                    "surface-tint": "#005bc0",
-                    "surface-variant": "#d3e4fe",
-                    "on-secondary-fixed": "#001e2c",
-                    "secondary": "#00668a",
-                    "on-secondary": "#ffffff",
-                    "on-background": "#0b1c30",
-                    "primary-fixed-dim": "#adc7ff",
-                    "surface-bright": "#f8f9ff",
-                    "surface-container-lowest": "#ffffff",
-                    "on-primary-fixed-variant": "#004493",
-                    "on-surface": "#0b1c30",
-                    "primary-fixed": "#d8e2ff",
-                    "surface-container-highest": "#d3e4fe",
-                    "tertiary": "#9e3d00",
-                    "on-primary-container": "#fefcff",
-                    "primary-container": "#0070ea",
-                    "surface-container-low": "#eff4ff",
-                    "secondary-fixed-dim": "#7ad0ff",
-                    "surface-container": "#e5eeff",
-                    "tertiary-fixed": "#ffdbcc",
-                    "on-error": "#ffffff",
-                    "tertiary-container": "#c64f00",
-                    "on-tertiary-container": "#fffbff",
-                    "secondary-container": "#00bdfd",
-                    "on-surface-variant": "#414754",
-                    "outline": "#717786",
-                    "background": "#f8f9ff",
-                    "on-tertiary-fixed": "#351000",
-                    "inverse-on-surface": "#eaf1ff",
-                    "on-tertiary": "#ffffff",
-                    "surface-dim": "#cbdbf5",
-                    "on-tertiary-fixed-variant": "#7c2e00"
+            colors: {
+              "primary": "#0059bb",
+              "primary-container": "#0070ea",
+              "primary-fixed": "#d8e2ff",
+              "on-primary": "#ffffff",
+              "on-surface": "#0b1c30",
+              "on-surface-variant": "#414754",
+              "surface": "#f8f9ff",
+              "surface-container-low": "#eff4ff",
+              "surface-container": "#e5eeff",
+              "surface-container-high": "#dce9ff",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#717786",
+              "outline-variant": "#c1c6d7",
+              "error": "#ba1a1a",
+              "error-container": "#ffdad6",
+              "secondary": "#00668a",
+              "secondary-container": "#00bdfd",
             },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
-            },
-            "fontFamily": {
-                    "headline": ["Inter"],
-                    "body": ["Inter"],
-                    "label": ["Inter"]
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
             }
           },
         },
@@ -89,35 +55,74 @@
             background: linear-gradient(135deg, #0059bb 0%, #0070ea 100%);
         }
         .gradient-button:hover {
-            box-shadow: 0 0 15px rgba(0, 89, 187, 0.3);
+            box-shadow: 0 0 20px rgba(0, 89, 187, 0.35);
+        }
+        .gradient-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .input-field {
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(0, 89, 187, 0.12);
         }
         .input-error { border: 2px solid #ba1a1a !important; }
-        .input-error-msg { color: #ba1a1a; font-size: 0.75rem; margin-top: 4px; display: none; }
-        .input-error-msg.show { display: block; }
+        .error-msg { color: #ba1a1a; font-size: 0.75rem; margin-top: 4px; display: none; }
+        .error-msg.show { display: block; }
+        .tab-active {
+            color: #0059bb;
+            border-bottom: 2px solid #0059bb;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            color: #717786;
+            border-bottom: 2px solid transparent;
+        }
+        .form-slide {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        }
+        .toast-enter {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        .loading-spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-surface text-on-surface min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<body class="bg-surface text-on-surface min-h-screen selection:bg-primary-fixed selection:text-on-surface">
 
     <!-- Navigation Bar -->
-    <header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(11,28,48,0.04)]">
+    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(11,28,48,0.04)]">
         <nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto w-full">
-            <a href="index.html" class="text-xl font-black tracking-tighter text-blue-700 dark:text-blue-500">TransitPulse</a>
+            <a href="index.html" class="text-xl font-black tracking-tighter text-blue-700">TransitPulse</a>
             <div class="hidden md:flex items-center gap-8">
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="index.html">Home</a>
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="dashboard.html">Dashboard</a>
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="live-map.html">Live Map</a>
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="vehicle-detail.html">Vehicles</a>
-                <a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors tracking-tight antialiased" href="admin.html" id="admin-nav-link" style="display: none;">Admin</a>
+                <a class="text-slate-500 font-medium hover:text-blue-600 transition-colors tracking-tight" href="index.html">Home</a>
+                <a class="text-slate-500 font-medium hover:text-blue-600 transition-colors tracking-tight" href="dashboard.html">Dashboard</a>
+                <a class="text-slate-500 font-medium hover:text-blue-600 transition-colors tracking-tight" href="live-map.html">Live Map</a>
             </div>
-            <a href="dashboard.html" class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-semibold transition-all scale-95 active:scale-100 duration-200 shadow-lg shadow-primary/20">
-                Dashboard
+            <a href="auth.html" class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-semibold transition-all active:scale-95 duration-200 shadow-lg shadow-primary/20">
+                Sign In
             </a>
         </nav>
     </header>
 
-    <div style="margin-top: 60px;">        <!-- Left Side: Product Illustration & Brand -->
-        <section class="hidden md:flex flex-1 relative items-center justify-center bg-primary-container p-12 overflow-hidden">
-            <!-- Decorative Elements -->
+    <main class="min-h-screen flex pt-[68px]">
+        <!-- Left Side: Brand Panel -->
+        <section class="hidden lg:flex flex-1 relative items-center justify-center bg-primary-container p-12 overflow-hidden">
             <div class="absolute inset-0 z-0 opacity-20">
                 <div class="absolute top-[-10%] left-[-10%] w-96 h-96 rounded-full bg-white blur-3xl"></div>
                 <div class="absolute bottom-[-5%] right-[-5%] w-[32rem] h-[32rem] rounded-full bg-secondary blur-3xl"></div>
@@ -130,27 +135,28 @@
                     <span class="text-3xl font-black tracking-tighter text-white">TransitPulse</span>
                 </div>
                 <h1 class="text-5xl font-extrabold text-white tracking-tight leading-tight mb-6">
-                    Precision Pulse <br/>Tracking for the <br/>Modern Campus.
+                    Precision Pulse<br/>Tracking for the<br/>Modern Campus.
                 </h1>
                 <p class="text-primary-fixed text-lg font-medium max-w-md mb-12 leading-relaxed opacity-90">
                     Real-time resilient transport logistics with fintech-grade accuracy. Join the network of 50+ campuses across the nation.
                 </p>
-                <!-- Product Preview Card (Bento Style) -->
+                <!-- Product Preview Card -->
                 <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl">
-                    <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center justify-between mb-6">
                         <div>
                             <span class="text-[10px] uppercase tracking-widest text-primary-fixed font-bold block mb-1">Live Status</span>
                             <h3 class="text-white font-bold text-xl">East Loop Shuttle</h3>
                         </div>
-                        <div class="px-3 py-1 bg-white/20 rounded-full">
+                        <div class="px-3 py-1 bg-white/20 rounded-full flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             <span class="text-white text-xs font-semibold">Active Now</span>
                         </div>
                     </div>
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         <div class="flex items-center gap-4">
-                            <div class="w-2 h-2 rounded-full bg-white"></div>
-                            <div class="h-[2px] flex-1 bg-white/20"></div>
-                            <div class="w-2 h-2 rounded-full bg-white/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                            <div class="h-[2px] flex-1 bg-gradient-to-r from-white/80 to-white/20"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-white/40"></div>
                         </div>
                         <div class="flex justify-between text-white/60 text-xs font-medium">
                             <span>Main Library</span>
@@ -159,269 +165,475 @@
                     </div>
                 </div>
             </div>
-            <!-- Absolute Map Background Image Overlay -->
-            <img alt="Abstract map overlay" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ-XP4FQVTqcM_EMiOBfEhiw2QmLo_oasOnf2teJ4aEWNDIWJDPGz3yDWzdlxVPJ5atA_EYQEJ6jsFb5OiKLHR-Z-xsKC0mnyQsaYHilNSevy2rFT3NjWf2GrCKu84nAMWiL_p5RKh_q_d-W4DBhXS-0TIMdEZyeta-q9zaqtfnvbfrSv5EelKZ3agUPuu5qg8R-wSLVfCMfQ3ruXdElddWFCVK18BxGB1DGk7mbLihugH4c6IoS5tZJ4nHPkyxGAdoYsQlkHRKmA"/>
         </section>
 
-        <!-- Right Side: Auth Container -->
+        <!-- Right Side: Auth Forms -->
         <section class="flex-1 flex items-center justify-center p-6 md:p-12 overflow-y-auto">
-            <div class="w-full max-w-md space-y-10">
-                <!-- Tab Switching / Context Head -->
+            <div class="w-full max-w-md space-y-8">
+                
+                <!-- Mobile Logo -->
+                <div class="lg:hidden flex items-center gap-2 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">directions_bus</span>
+                    </div>
+                    <span class="text-2xl font-black tracking-tighter text-blue-700">TransitPulse</span>
+                </div>
+
+                <!-- Auth Tabs -->
                 <div class="space-y-2">
-                    <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Welcome back</h2>
-                    <p class="text-on-surface-variant font-medium">Enter your credentials to access the pulse dashboard.</p>
-                </div>
-
-                <!-- Auth Forms Grid -->
-                <div class="space-y-6" id="auth-forms">
-                    <!-- Login Form -->
-                    <form class="space-y-5" id="login-form" onsubmit="handleLogin(event)">
-                        <div class="space-y-1.5">
-                            <label class="text-sm font-semibold text-on-surface-variant ml-1" for="email">Email Address</label>
-                            <div class="relative">
-                                <input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all text-on-surface font-medium placeholder:text-outline" id="email" placeholder="name@college.edu" type="email"/>
-                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
-                            </div>
-                            <p class="input-error-msg" id="email-error">Please enter a valid email address.</p>
-                        </div>
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between items-center px-1">
-                                <label class="text-sm font-semibold text-on-surface-variant" for="password">Password</label>
-                                <a class="text-xs font-bold text-primary hover:underline underline-offset-4" href="#" onclick="showToast('Reset link sent to your email.')">Forgot password?</a>
-                            </div>
-                            <div class="relative">
-                                <input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all text-on-surface font-medium placeholder:text-outline" id="password" placeholder="••••••••" type="password"/>
-                                <button type="button" onclick="togglePassword()" class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl cursor-pointer" id="pw-toggle">lock</button>
-                            </div>
-                            <p class="input-error-msg" id="password-error">Password must be at least 6 characters.</p>
-                        </div>
-                        <div class="flex items-center gap-2 px-1">
-                            <input class="w-5 h-5 rounded-lg border-outline-variant text-primary focus:ring-primary/20 transition-all" id="remember" type="checkbox"/>
-                            <label class="text-sm font-medium text-on-surface-variant cursor-pointer" for="remember">Remember me for 30 days</label>
-                        </div>
-                        <button class="w-full py-4 gradient-button text-white font-bold rounded-full text-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/10" type="submit" id="login-btn">
-                            Sign in
+                    <div class="flex gap-6 border-b border-slate-200" id="auth-tabs">
+                        <button class="pb-3 text-sm font-semibold tracking-tight tab-active cursor-pointer transition-colors" id="tab-login" onclick="switchTab('login')">
+                            Sign In
                         </button>
-                    </form>
-
-                    <!-- Divider -->
-                    <div class="relative flex items-center py-2">
-                        <div class="flex-grow border-t border-surface-container-high"></div>
-                        <span class="flex-shrink mx-4 text-outline-variant text-xs font-bold uppercase tracking-widest">or continue with</span>
-                        <div class="flex-grow border-t border-surface-container-high"></div>
-                    </div>
-
-                    <!-- Social / Alt Login -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <button class="flex items-center justify-center gap-2 py-3.5 bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-2xl font-bold text-on-surface-variant text-sm">
-                            <img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlvGrwtevOQtJUAxMiCWcKa9O9wccZuH5fI8dJT3OCKDAZltY0H7ccPsDAF3Fhy8SeqMzSlmw1y0GKVcVCEcBiGU3F4tYJFT7Tobhqa0LPkDtZMzStTpHqSZxLIpDqsLPF4be2jNk_P7tk1azZ9ZTyg58SCe6F5sbBWHLCwVrmYlhGeQ5sHTpDJNrpQ8RjLFbmJHfF6UJuZg5gGZV1Lhko8HdNxPjqy8FCu59h66f-cw_sr-gRIBXAKJ7hJLas0wKPAZRQfWm-Ctw"/>
-                            Google
-                        </button>
-                        <button class="flex items-center justify-center gap-2 py-3.5 bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-2xl font-bold text-on-surface-variant text-sm">
-                            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">terminal</span>
-                            SSO
+                        <button class="pb-3 text-sm font-semibold tracking-tight tab-inactive cursor-pointer transition-colors" id="tab-signup" onclick="switchTab('signup')">
+                            Create Account
                         </button>
                     </div>
                 </div>
 
-                <!-- Sign Up Footer -->
-                <p class="text-center text-on-surface-variant font-medium">
+                <!-- Alert Banner -->
+                <div class="hidden items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium" id="alert-banner">
+                    <span class="material-symbols-outlined text-lg" id="alert-icon">info</span>
+                    <p id="alert-text"></p>
+                    <button onclick="hideAlert()" class="ml-auto text-current opacity-60 hover:opacity-100">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form class="space-y-5 form-slide" id="login-form" onsubmit="handleLogin(event)">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-semibold text-on-surface-variant ml-1" for="login-email">Email Address</label>
+                        <div class="relative">
+                            <input class="input-field w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest text-on-surface font-medium placeholder:text-outline" id="login-email" placeholder="name@college.edu" type="email" required/>
+                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
+                        </div>
+                        <p class="error-msg" id="login-email-error">Please enter a valid email address.</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center px-1">
+                            <label class="text-sm font-semibold text-on-surface-variant" for="login-password">Password</label>
+                            <a class="text-xs font-bold text-primary hover:underline underline-offset-4 cursor-pointer" onclick="handleForgotPassword()">Forgot password?</a>
+                        </div>
+                        <div class="relative">
+                            <input class="input-field w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest text-on-surface font-medium placeholder:text-outline" id="login-password" placeholder="••••••••" type="password" minlength="6" required/>
+                            <button type="button" onclick="togglePassword('login-password', 'login-pw-toggle')" class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl cursor-pointer hover:text-on-surface transition-colors" id="login-pw-toggle">lock</button>
+                        </div>
+                        <p class="error-msg" id="login-password-error">Password must be at least 6 characters.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 px-1">
+                        <input class="w-5 h-5 rounded-lg border-outline-variant text-primary focus:ring-primary/20 transition-all" id="remember" type="checkbox"/>
+                        <label class="text-sm font-medium text-on-surface-variant cursor-pointer" for="remember">Remember me for 30 days</label>
+                    </div>
+
+                    <button class="w-full py-4 gradient-button text-white font-bold rounded-full text-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/10 flex items-center justify-center gap-2" type="submit" id="login-btn">
+                        <span id="login-btn-text">Sign In</span>
+                        <span class="loading-spinner hidden" id="login-spinner"></span>
+                    </button>
+                </form>
+
+                <!-- Signup Form (hidden by default) -->
+                <form class="space-y-5 form-slide hidden" id="signup-form" onsubmit="handleSignup(event)">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-semibold text-on-surface-variant ml-1" for="signup-name">Full Name</label>
+                        <div class="relative">
+                            <input class="input-field w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest text-on-surface font-medium placeholder:text-outline" id="signup-name" placeholder="John Doe" type="text" required/>
+                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl">person</span>
+                        </div>
+                        <p class="error-msg" id="signup-name-error">Please enter your name.</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-semibold text-on-surface-variant ml-1" for="signup-email">Email Address</label>
+                        <div class="relative">
+                            <input class="input-field w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest text-on-surface font-medium placeholder:text-outline" id="signup-email" placeholder="name@college.edu" type="email" required/>
+                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
+                        </div>
+                        <p class="error-msg" id="signup-email-error">Please enter a valid email address.</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-semibold text-on-surface-variant ml-1" for="signup-password">Password</label>
+                        <div class="relative">
+                            <input class="input-field w-full px-5 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest text-on-surface font-medium placeholder:text-outline" id="signup-password" placeholder="Minimum 6 characters" type="password" minlength="6" required/>
+                            <button type="button" onclick="togglePassword('signup-password', 'signup-pw-toggle')" class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-xl cursor-pointer hover:text-on-surface transition-colors" id="signup-pw-toggle">lock</button>
+                        </div>
+                        <p class="error-msg" id="signup-password-error">Password must be at least 6 characters.</p>
+                        <!-- Password strength indicator -->
+                        <div class="flex gap-1 mt-2 px-1" id="password-strength">
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors" id="str-1"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors" id="str-2"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors" id="str-3"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors" id="str-4"></div>
+                        </div>
+                        <p class="text-[11px] font-medium text-slate-400 px-1 mt-1" id="strength-label"></p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-semibold text-on-surface-variant ml-1" for="signup-role">I am a</label>
+                        <div class="grid grid-cols-3 gap-3" id="role-selector">
+                            <button type="button" onclick="selectRole('student')" class="role-btn active flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-primary/10 text-primary border-2 border-primary/30 transition-all" data-role="student">
+                                <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">school</span>
+                                <span class="text-xs font-bold">Student</span>
+                            </button>
+                            <button type="button" onclick="selectRole('driver')" class="role-btn flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-surface-container-low text-on-surface-variant border-2 border-transparent hover:border-outline-variant/50 transition-all" data-role="driver">
+                                <span class="material-symbols-outlined text-xl">local_shipping</span>
+                                <span class="text-xs font-bold">Driver</span>
+                            </button>
+                            <button type="button" onclick="selectRole('admin')" class="role-btn flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-surface-container-low text-on-surface-variant border-2 border-transparent hover:border-outline-variant/50 transition-all" data-role="admin">
+                                <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+                                <span class="text-xs font-bold">Admin</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="w-full py-4 gradient-button text-white font-bold rounded-full text-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/10 flex items-center justify-center gap-2" type="submit" id="signup-btn">
+                        <span id="signup-btn-text">Create Account</span>
+                        <span class="loading-spinner hidden" id="signup-spinner"></span>
+                    </button>
+                </form>
+
+                <!-- Footer switch -->
+                <p class="text-center text-on-surface-variant font-medium" id="auth-footer">
                     New to TransitPulse? 
-                    <a class="text-primary font-bold hover:underline underline-offset-4" href="#" onclick="showToast('Registration coming soon!')">Create Account</a>
+                    <a class="text-primary font-bold hover:underline underline-offset-4 cursor-pointer" onclick="switchTab('signup')">Create Account</a>
                 </p>
             </div>
         </section>
     </main>
 
-    <!-- Modal Mockup: OTP Verification (Hidden by default) -->
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-on-surface/20 backdrop-blur-sm hidden" id="otp-modal">
-        <div class="glass-card w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative">
-            <button class="absolute top-6 right-6 text-outline hover:text-on-surface">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-            <div class="space-y-8 text-center">
-                <div class="w-16 h-16 bg-primary-fixed rounded-3xl flex items-center justify-center mx-auto">
-                    <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-                </div>
-                <div class="space-y-2">
-                    <h2 class="text-2xl font-extrabold tracking-tight">Verify Identity</h2>
-                    <p class="text-on-surface-variant text-sm px-4">We've sent a 6-digit code to <span class="text-on-surface font-bold">alex@campus.edu</span></p>
-                </div>
-                <div class="flex justify-between gap-2">
-                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text" value="8"/>
-                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text" value="2"/>
-                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text" value="0"/>
-                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text"/>
-                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text"/>
-                    <input class="w-12 h-14 text-center text-xl font-bold bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20" maxlength="1" type="text"/>
-                </div>
-                <div class="space-y-4">
-                    <button class="w-full py-4 gradient-button text-white font-bold rounded-full transition-all shadow-lg">Verify</button>
-                    <button class="text-sm font-bold text-outline hover:text-primary transition-colors">Resend Code (45s)</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mini Component Preview Footer (Toast) -->
-    <footer class="fixed bottom-6 right-6 flex flex-col gap-3 pointer-events-none md:pointer-events-auto">
-        <div class="bg-white rounded-2xl p-4 shadow-xl flex items-center gap-4 border border-outline-variant/10 max-w-xs transition-all duration-500 opacity-0 translate-y-4" id="toast">
-            <div class="w-8 h-8 bg-primary-fixed rounded-full flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-primary text-lg" id="toast-icon">check</span>
+    <!-- Toast Notification -->
+    <div class="fixed bottom-6 right-6 z-50 pointer-events-none">
+        <div class="bg-white rounded-2xl p-4 shadow-xl flex items-center gap-4 border border-slate-100 max-w-xs transition-all duration-500 opacity-0 translate-y-4 pointer-events-auto" id="toast">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" id="toast-icon-bg">
+                <span class="material-symbols-outlined text-lg" id="toast-icon">check</span>
             </div>
             <div>
                 <p class="text-xs font-bold text-on-surface" id="toast-title">Success</p>
                 <p class="text-[10px] text-on-surface-variant" id="toast-msg">Action completed.</p>
             </div>
         </div>
-    </footer>
+    </div>
 
     <script>
-        // Check URL parameters for admin mode
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdminMode = urlParams.get('admin') === 'true';
-        const redirectUrl = urlParams.get('redirect');
-        const message = urlParams.get('message');
+        // ─── State ───────────────────────────────────────────────────────
+        let currentTab = 'login';
+        let selectedRole = 'student';
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
 
-        // Update UI for admin mode
-        if (isAdminMode) {
-            document.querySelector('h2').textContent = 'Admin Access';
-            document.querySelector('p').textContent = 'Enter your admin credentials to access the control panel.';
-            document.getElementById('email').placeholder = 'admin@transitpulse.com';
-            
-            // Show admin message if present
-            if (message === 'logged_out') {
-                showToast('You have been logged out successfully', 'Logged Out', 'check_circle');
+        // ─── On Load: Check if already authenticated ─────────────────────
+        (async function checkExistingSession() {
+            try {
+                const { session } = await getAuthSession();
+                if (session) {
+                    // Already logged in — redirect
+                    window.location.replace(redirectUrl || 'dashboard.html');
+                }
+            } catch (err) {
+                console.log('No existing session');
             }
-        }
+        })();
 
-        function showToast(msg, title = 'Info', icon = 'info') {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-title').textContent = title;
-            document.getElementById('toast-msg').textContent = msg;
-            document.getElementById('toast-icon').textContent = icon;
-            toast.classList.remove('opacity-0', 'translate-y-4');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4');
-                toast.classList.remove('opacity-100', 'translate-y-0');
-            }, 3000);
-        }
+        // ─── Tab Switching ──────────────────────────────────────────────
+        function switchTab(tab) {
+            currentTab = tab;
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            const footer = document.getElementById('auth-footer');
 
-        function togglePassword() {
-            const pw = document.getElementById('password');
-            const btn = document.getElementById('pw-toggle');
-            if (pw.type === 'password') {
-                pw.type = 'text';
-                btn.textContent = 'lock_open';
+            hideAlert();
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                tabLogin.className = tabLogin.className.replace('tab-inactive', 'tab-active');
+                tabSignup.className = tabSignup.className.replace('tab-active', 'tab-inactive');
+                footer.innerHTML = `New to TransitPulse? <a class="text-primary font-bold hover:underline underline-offset-4 cursor-pointer" onclick="switchTab('signup')">Create Account</a>`;
             } else {
-                pw.type = 'password';
-                btn.textContent = 'lock';
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                tabSignup.className = tabSignup.className.replace('tab-inactive', 'tab-active');
+                tabLogin.className = tabLogin.className.replace('tab-active', 'tab-inactive');
+                footer.innerHTML = `Already have an account? <a class="text-primary font-bold hover:underline underline-offset-4 cursor-pointer" onclick="switchTab('login')">Sign In</a>`;
             }
         }
 
+        // ─── Role Selection ─────────────────────────────────────────────
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                if (btn.dataset.role === role) {
+                    btn.className = 'role-btn active flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-primary/10 text-primary border-2 border-primary/30 transition-all';
+                    btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
+                } else {
+                    btn.className = 'role-btn flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-surface-container-low text-on-surface-variant border-2 border-transparent hover:border-outline-variant/50 transition-all';
+                    btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+        }
+
+        // ─── Password Toggle ────────────────────────────────────────────
+        function togglePassword(inputId, toggleId) {
+            const input = document.getElementById(inputId);
+            const toggle = document.getElementById(toggleId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'lock_open';
+            } else {
+                input.type = 'password';
+                toggle.textContent = 'lock';
+            }
+        }
+
+        // ─── Password Strength ──────────────────────────────────────────
+        document.getElementById('signup-password')?.addEventListener('input', function() {
+            const val = this.value;
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+            if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score++;
+
+            const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-400'];
+            const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+
+            for (let i = 1; i <= 4; i++) {
+                const bar = document.getElementById(`str-${i}`);
+                bar.className = `h-1 flex-1 rounded-full transition-colors ${i <= score ? colors[score - 1] : 'bg-slate-200'}`;
+            }
+            document.getElementById('strength-label').textContent = val.length > 0 ? labels[score - 1] || '' : '';
+        });
+
+        // ─── Login Handler ──────────────────────────────────────────────
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('email');
-            const password = document.getElementById('password');
-            const emailErr = document.getElementById('email-error');
-            const pwErr = document.getElementById('password-error');
+            const email = document.getElementById('login-email');
+            const password = document.getElementById('login-password');
+            
+            // Reset errors
+            clearErrors();
+
+            // Validate
             let valid = true;
-
-            // Reset
-            email.classList.remove('input-error');
-            password.classList.remove('input-error');
-            emailErr.classList.remove('show');
-            pwErr.classList.remove('show');
-
             if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-                email.classList.add('input-error');
-                emailErr.classList.add('show');
+                showFieldError('login-email', 'login-email-error');
                 valid = false;
             }
             if (!password.value || password.value.length < 6) {
-                password.classList.add('input-error');
-                pwErr.classList.add('show');
+                showFieldError('login-password', 'login-password-error');
                 valid = false;
             }
             if (!valid) return;
 
-            const btn = document.getElementById('login-btn');
-            const originalText = btn.textContent;
-            btn.textContent = 'Verifying...';
-            btn.disabled = true;
+            // Show loading
+            setButtonLoading('login-btn', 'login-btn-text', 'login-spinner', true);
 
             try {
-                if (isAdminMode) {
-                    // Admin login
-                    const response = await fetch('http://localhost:3000/api/admin/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include', // Include cookies
-                        body: JSON.stringify({
-                            email: email.value,
-                            password: password.value
-                        })
-                    });
+                const sb = getSupabase();
+                const { data, error } = await sb.auth.signInWithPassword({
+                    email: email.value.trim(),
+                    password: password.value,
+                });
 
-                    const data = await response.json();
+                if (error) throw error;
 
-                    if (response.ok && data.success) {
-                        showToast('Admin login successful! Redirecting...', 'Welcome back', 'check_circle');
-                        setTimeout(() => {
-                            window.location.href = redirectUrl || 'admin.html';
-                        }, 1500);
-                    } else {
-                        showToast(data.message || 'Invalid admin credentials', 'Login Failed', 'error');
-                        btn.textContent = originalText;
-                        btn.disabled = false;
-                    }
-                } else {
-                    // Regular user login (simulate OTP for now)
-                    setTimeout(() => {
-                        btn.textContent = originalText;
-                        btn.disabled = false;
-                        document.getElementById('otp-modal').classList.remove('hidden');
-                    }, 1200);
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showToast('Login failed. Please try again.', 'Error', 'error');
-                btn.textContent = originalText;
-                btn.disabled = false;
+                showAlert('Login successful! Redirecting...', 'success');
+                showToast('Welcome back!', 'Signed In', 'check_circle', 'success');
+
+                setTimeout(() => {
+                    window.location.href = redirectUrl || 'dashboard.html';
+                }, 1000);
+
+            } catch (err) {
+                console.error('Login error:', err);
+                const msg = err.message === 'Invalid login credentials' 
+                    ? 'Invalid email or password. Please try again.'
+                    : err.message || 'Login failed. Please try again.';
+                showAlert(msg, 'error');
+                setButtonLoading('login-btn', 'login-btn-text', 'login-spinner', false);
             }
         }
 
-        // OTP auto-advance
-        document.querySelectorAll('#otp-modal input[type="text"]').forEach((input, i, inputs) => {
-            input.addEventListener('input', () => {
-                if (input.value.length === 1 && i < inputs.length - 1) inputs[i + 1].focus();
-            });
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !input.value && i > 0) inputs[i - 1].focus();
-            });
-        });
+        // ─── Signup Handler ─────────────────────────────────────────────
+        async function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name');
+            const email = document.getElementById('signup-email');
+            const password = document.getElementById('signup-password');
 
-        // OTP verify button
-        document.querySelector('#otp-modal button.w-full').addEventListener('click', () => {
-            const inputs = document.querySelectorAll('#otp-modal input[type="text"]');
-            const code = Array.from(inputs).map(i => i.value).join('');
-            if (code.length === 6) {
-                document.getElementById('otp-modal').classList.add('hidden');
-                showToast('Login successful! Redirecting...', 'Welcome back', 'check_circle');
-                setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
-            } else {
-                showToast('Enter all 6 digits.', 'Incomplete Code', 'error');
+            // Reset errors
+            clearErrors();
+
+            // Validate
+            let valid = true;
+            if (!name.value.trim()) {
+                showFieldError('signup-name', 'signup-name-error');
+                valid = false;
             }
-        });
+            if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                showFieldError('signup-email', 'signup-email-error');
+                valid = false;
+            }
+            if (!password.value || password.value.length < 6) {
+                showFieldError('signup-password', 'signup-password-error');
+                valid = false;
+            }
+            if (!valid) return;
 
-        // Close OTP modal
-        document.querySelector('#otp-modal button.absolute').addEventListener('click', () => {
-            document.getElementById('otp-modal').classList.add('hidden');
-        });
+            // Show loading
+            setButtonLoading('signup-btn', 'signup-btn-text', 'signup-spinner', true);
+
+            try {
+                const sb = getSupabase();
+                const { data, error } = await sb.auth.signUp({
+                    email: email.value.trim(),
+                    password: password.value,
+                    options: {
+                        data: {
+                            name: name.value.trim(),
+                            role: selectedRole,
+                        },
+                    },
+                });
+
+                if (error) throw error;
+
+                // Check if email confirmation is required
+                if (data.user && !data.session) {
+                    // Email confirmation needed
+                    showAlert('Account created! Please check your email to verify your account.', 'info');
+                    showToast('Check your inbox', 'Email Sent', 'mail', 'info');
+                } else if (data.session) {
+                    // Auto-confirmed (e.g., in dev mode)
+                    showAlert('Account created! Redirecting...', 'success');
+                    showToast('Welcome aboard!', 'Account Created', 'check_circle', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1200);
+                }
+
+                setButtonLoading('signup-btn', 'signup-btn-text', 'signup-spinner', false);
+
+            } catch (err) {
+                console.error('Signup error:', err);
+                const msg = err.message.includes('already registered')
+                    ? 'This email is already registered. Try signing in instead.'
+                    : err.message || 'Signup failed. Please try again.';
+                showAlert(msg, 'error');
+                setButtonLoading('signup-btn', 'signup-btn-text', 'signup-spinner', false);
+            }
+        }
+
+        // ─── Forgot Password ────────────────────────────────────────────
+        async function handleForgotPassword() {
+            const email = document.getElementById('login-email').value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showAlert('Please enter your email address first, then click "Forgot password?"', 'info');
+                return;
+            }
+
+            try {
+                const sb = getSupabase();
+                const { error } = await sb.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + '/auth.html',
+                });
+
+                if (error) throw error;
+
+                showAlert('Password reset link sent to ' + email + '. Check your inbox.', 'success');
+                showToast('Check your email', 'Reset Link Sent', 'mail', 'success');
+            } catch (err) {
+                showAlert(err.message || 'Failed to send reset link.', 'error');
+            }
+        }
+
+        // ─── UI Helpers ─────────────────────────────────────────────────
+        function showFieldError(inputId, errorId) {
+            document.getElementById(inputId).classList.add('input-error');
+            document.getElementById(errorId).classList.add('show');
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+            document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+        }
+
+        function setButtonLoading(btnId, textId, spinnerId, loading) {
+            const btn = document.getElementById(btnId);
+            const text = document.getElementById(textId);
+            const spinner = document.getElementById(spinnerId);
+            btn.disabled = loading;
+            if (loading) {
+                text.textContent = currentTab === 'login' ? 'Signing in...' : 'Creating account...';
+                spinner.classList.remove('hidden');
+            } else {
+                text.textContent = currentTab === 'login' ? 'Sign In' : 'Create Account';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const banner = document.getElementById('alert-banner');
+            const icon = document.getElementById('alert-icon');
+            const text = document.getElementById('alert-text');
+
+            text.textContent = message;
+
+            const styles = {
+                success: { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: 'check_circle' },
+                error: { bg: 'bg-red-50', text: 'text-red-700', icon: 'error' },
+                info: { bg: 'bg-blue-50', text: 'text-blue-700', icon: 'info' },
+            };
+
+            const s = styles[type] || styles.info;
+            banner.className = `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium ${s.bg} ${s.text} toast-enter`;
+            icon.textContent = s.icon;
+        }
+
+        function hideAlert() {
+            document.getElementById('alert-banner').className = 'hidden items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium';
+        }
+
+        function showToast(msg, title = 'Info', iconName = 'info', type = 'info') {
+            const toast = document.getElementById('toast');
+            const iconBg = document.getElementById('toast-icon-bg');
+            const icon = document.getElementById('toast-icon');
+
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-msg').textContent = msg;
+            icon.textContent = iconName;
+
+            const colors = {
+                success: { bg: 'bg-emerald-100', fg: 'text-emerald-600' },
+                error: { bg: 'bg-red-100', fg: 'text-red-600' },
+                info: { bg: 'bg-blue-100', fg: 'text-blue-600' },
+            };
+            const c = colors[type] || colors.info;
+            iconBg.className = `w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${c.bg}`;
+            icon.className = `material-symbols-outlined text-lg ${c.fg}`;
+
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0', 'toast-enter');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0', 'toast-enter');
+            }, 4000);
+        }
+
+        // ─── URL Parameter Handling ─────────────────────────────────────
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'signup') switchTab('signup');
+        if (params.get('message') === 'logged_out') {
+            showToast('You have been logged out.', 'Signed Out', 'check_circle', 'info');
+        }
+        if (params.get('message') === 'session_expired') {
+            showAlert('Your session has expired. Please sign in again.', 'info');
+        }
     </script>
-
 </body>
 </html>

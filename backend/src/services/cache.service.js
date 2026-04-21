@@ -4,6 +4,7 @@ const logger = require('../utils/logger');
 const VEHICLE_STATE_TTL = 30;       // seconds
 const STOP_ETA_TTL = 15;            // seconds
 const SEQ_SET_TTL = 3600;           // 1 hour
+const VEHICLE_ETA_TTL = 7;          // seconds — cached ETA
 
 /**
  * Store all fields of a vehicle's live state in a Redis hash.
@@ -39,6 +40,34 @@ async function getVehicleState(vehicleId) {
     logger.error('cache.getVehicleState error', { vehicleId, message: err.message });
     return null;
   }
+}
+
+/**
+ * Scan all vehicle state keys in Redis.
+ * Returns an array of { vehicle_id, ...state } objects.
+ * Uses SCAN to avoid blocking Redis.
+ * @returns {Promise<Array<object>>}
+ */
+async function getAllVehicleStates() {
+  const states = [];
+  try {
+    let cursor = '0';
+    do {
+      const [newCursor, keys] = await redisCache.scan(cursor, 'MATCH', 'vehicle:*:state', 'COUNT', 100);
+      cursor = newCursor;
+      for (const key of keys) {
+        const data = await redisCache.hgetall(key);
+        if (data && Object.keys(data).length > 0) {
+          // Extract vehicle_id from key format "vehicle:{id}:state"
+          const vehicleId = key.replace('vehicle:', '').replace(':state', '');
+          states.push({ vehicle_id: vehicleId, ...data });
+        }
+      }
+    } while (cursor !== '0');
+  } catch (err) {
+    logger.error('cache.getAllVehicleStates error', { message: err.message });
+  }
+  return states;
 }
 
 /**
@@ -100,6 +129,38 @@ async function getStopETA(routeId, stopId) {
   } catch (err) {
     logger.error('cache.getStopETA error', { routeId, stopId, message: err.message });
     return {};
+  }
+}
+
+/**
+ * Cache a computed ETA for a vehicle with a short TTL.
+ * Prevents re-computing ETA on every update if data is fresh.
+ * @param {string} vehicleId
+ * @param {object} etaObj - ETA prediction result
+ * @param {number} [ttlSeconds=7] - Cache TTL
+ */
+async function setVehicleETA(vehicleId, etaObj, ttlSeconds = VEHICLE_ETA_TTL) {
+  const key = `vehicle:${vehicleId}:eta`;
+  try {
+    await redisCache.set(key, JSON.stringify(etaObj), 'EX', ttlSeconds);
+  } catch (err) {
+    logger.error('cache.setVehicleETA error', { vehicleId, message: err.message });
+  }
+}
+
+/**
+ * Get cached ETA for a vehicle. Returns null if expired.
+ * @param {string} vehicleId
+ * @returns {Promise<object|null>}
+ */
+async function getVehicleETA(vehicleId) {
+  const key = `vehicle:${vehicleId}:eta`;
+  try {
+    const data = await redisCache.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (err) {
+    logger.error('cache.getVehicleETA error', { vehicleId, message: err.message });
+    return null;
   }
 }
 
@@ -200,17 +261,74 @@ async function publishUpdate(channel, data) {
   }
 }
 
+/**
+ * Publish a vehicle position update with minimal payload.
+ * Uses the 'vehicle:update' channel.
+ * @param {string} vehicleId
+ * @param {object} data - Minimal vehicle data
+ */
+async function publishVehicleUpdate(vehicleId, data) {
+  try {
+    const payload = {
+      vehicle_id: data.vehicle_id || vehicleId,
+      lat: data.lat,
+      lng: data.lng,
+      speed: data.speed,
+      heading: data.heading,
+      status: data.status,
+      route_id: data.route_id || null,
+      next_stop_id: data.next_stop_id || null,
+      next_stop_name: data.next_stop_name || null,
+      eta_next_stop: data.eta_next_stop || null,
+      bus_number: data.bus_number || null,
+      last_updated: data.last_updated || new Date().toISOString(),
+    };
+    await redisCache.publish('vehicle:update', JSON.stringify(payload));
+
+    // Also publish to legacy channel for backward compatibility
+    await redisCache.publish('live_updates', JSON.stringify(payload));
+  } catch (err) {
+    logger.error('cache.publishVehicleUpdate error', { vehicleId, message: err.message });
+  }
+}
+
+/**
+ * Publish a vehicle status change event.
+ * Uses the 'vehicle:status' channel.
+ * @param {string} vehicleId
+ * @param {string} oldStatus
+ * @param {string} newStatus
+ */
+async function publishStatusChange(vehicleId, oldStatus, newStatus) {
+  try {
+    const payload = {
+      vehicle_id: vehicleId,
+      old_status: oldStatus,
+      new_status: newStatus,
+      timestamp: new Date().toISOString(),
+    };
+    await redisCache.publish('vehicle:status', JSON.stringify(payload));
+  } catch (err) {
+    logger.error('cache.publishStatusChange error', { vehicleId, message: err.message });
+  }
+}
+
 module.exports = {
   setVehicleState,
   getVehicleState,
+  getAllVehicleStates,
   addVehicleToRoute,
   getRouteVehicles,
   setStopETA,
   getStopETA,
+  setVehicleETA,
+  getVehicleETA,
   updateActiveVehicles,
   getActiveVehicleCount,
   setBufferCount,
   getBufferCount,
   isDuplicateSeq,
   publishUpdate,
+  publishVehicleUpdate,
+  publishStatusChange,
 };

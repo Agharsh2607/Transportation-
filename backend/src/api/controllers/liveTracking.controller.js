@@ -1,4 +1,5 @@
 const vehicleStatusModel = require('../../models/vehicleStatus.model');
+const cacheService = require('../../services/cache.service');
 const logger = require('../../utils/logger');
 
 class LiveTrackingController {
@@ -47,8 +48,23 @@ class LiveTrackingController {
         accuracy: parseFloat(accuracy) || null
       });
 
-      // Broadcast update via WebSocket
-      this.broadcastVehicleUpdate(vehicle);
+      // Broadcast update via Redis (minimal payload)
+      try {
+        await cacheService.publishVehicleUpdate(vehicle_id, {
+          vehicle_id: vehicle.vehicle_id,
+          bus_number: vehicle.bus_number,
+          lat: parseFloat(vehicle.lat),
+          lng: parseFloat(vehicle.lng),
+          speed: parseFloat(vehicle.speed) || 0,
+          heading: parseFloat(vehicle.heading) || 0,
+          status: vehicle.status,
+          route_id: vehicle.route_id,
+          last_updated: vehicle.last_updated,
+          driver_name: vehicle.driver_name,
+        });
+      } catch (wsErr) {
+        logger.warn('Failed to broadcast vehicle update', { error: wsErr.message });
+      }
 
       logger.info('Vehicle position updated', {
         vehicle_id,
@@ -80,11 +96,36 @@ class LiveTrackingController {
   }
 
   /**
-   * Get all active vehicles
+   * Get all active vehicles.
+   * Supports viewport filtering via ?bbox=minLat,minLng,maxLat,maxLng
    */
   async getActiveVehicles(req, res) {
     try {
-      const vehicles = await vehicleStatusModel.getAllActiveVehicles();
+      let vehicles;
+
+      // Check for bbox query parameter
+      const { bbox } = req.query;
+      if (bbox) {
+        const parts = bbox.split(',').map(Number);
+        if (parts.length === 4 && parts.every(n => !isNaN(n))) {
+          const [minLat, minLng, maxLat, maxLng] = parts;
+
+          // Validate bbox makes sense
+          if (minLat >= -90 && maxLat <= 90 && minLng >= -180 && maxLng <= 180 && minLat <= maxLat && minLng <= maxLng) {
+            vehicles = await vehicleStatusModel.getVehiclesInBBox(minLat, minLng, maxLat, maxLng);
+          } else {
+            return res.status(400).json({
+              error: 'Invalid bbox coordinates. Format: minLat,minLng,maxLat,maxLng'
+            });
+          }
+        } else {
+          return res.status(400).json({
+            error: 'Invalid bbox format. Expected: minLat,minLng,maxLat,maxLng (4 numbers)'
+          });
+        }
+      } else {
+        vehicles = await vehicleStatusModel.getAllActiveVehicles();
+      }
 
       res.json({
         success: true,
@@ -148,17 +189,24 @@ class LiveTrackingController {
         });
       }
 
+      // Get existing vehicle to preserve data
+      const existing = await vehicleStatusModel.getVehicle(vehicle_id);
+
       // Update vehicle status to offline
       const vehicle = await vehicleStatusModel.upsertVehicle({
         vehicle_id,
-        bus_number: 'Unknown', // Will be updated from existing data
-        lat: 0,
-        lng: 0,
+        bus_number: existing ? existing.bus_number : 'Unknown',
+        lat: existing ? existing.lat : 0,
+        lng: existing ? existing.lng : 0,
         status: 'offline'
       });
 
-      // Broadcast update
-      this.broadcastVehicleUpdate(vehicle);
+      // Broadcast status change
+      try {
+        await cacheService.publishStatusChange(vehicle_id, 'live', 'offline');
+      } catch (wsErr) {
+        logger.warn('Failed to broadcast status change', { error: wsErr.message });
+      }
 
       res.json({
         success: true,
@@ -171,39 +219,6 @@ class LiveTrackingController {
         error: 'Failed to stop tracking',
         message: error.message
       });
-    }
-  }
-
-  /**
-   * Broadcast vehicle update via WebSocket
-   */
-  broadcastVehicleUpdate(vehicle) {
-    try {
-      // Get WebSocket broadcaster
-      const { broadcast } = require('../../websocket/ws.broadcaster');
-      
-      // Broadcast to all clients
-      broadcast('live_vehicles', {
-        type: 'vehicle_update',
-        vehicle: {
-          vehicle_id: vehicle.vehicle_id,
-          bus_number: vehicle.bus_number,
-          lat: parseFloat(vehicle.lat),
-          lng: parseFloat(vehicle.lng),
-          speed: parseFloat(vehicle.speed) || 0,
-          heading: parseFloat(vehicle.heading) || 0,
-          status: vehicle.status,
-          last_updated: vehicle.last_updated,
-          route_id: vehicle.route_id,
-          driver_name: vehicle.driver_name,
-          accuracy: vehicle.accuracy
-        },
-        timestamp: Date.now()
-      });
-
-      logger.debug('Vehicle update broadcasted', { vehicle_id: vehicle.vehicle_id });
-    } catch (error) {
-      logger.warn('Failed to broadcast vehicle update', { error: error.message });
     }
   }
 }

@@ -5,6 +5,23 @@ const logger = require('../utils/logger');
 let inMemoryVehicles = new Map();
 let useInMemory = false;
 
+// Status thresholds (seconds since last update)
+const STATUS_THRESHOLDS = {
+  LIVE_MAX: 10,
+  DELAYED_MAX: 30,
+};
+
+/**
+ * Compute vehicle status from seconds since last update.
+ * @param {number} secondsSinceUpdate
+ * @returns {'live'|'delayed'|'offline'}
+ */
+function computeStatus(secondsSinceUpdate) {
+  if (secondsSinceUpdate <= STATUS_THRESHOLDS.LIVE_MAX) return 'live';
+  if (secondsSinceUpdate <= STATUS_THRESHOLDS.DELAYED_MAX) return 'delayed';
+  return 'offline';
+}
+
 /**
  * Vehicle Status Model - Single source of truth for live vehicle tracking
  */
@@ -26,7 +43,8 @@ class VehicleStatusModel {
   }
 
   /**
-   * Create vehicle_status table if it doesn't exist
+   * Create vehicle_status table if it doesn't exist.
+   * Includes route_index and next_stop_id columns for route matching.
    */
   async createTableIfNotExists() {
     try {
@@ -41,6 +59,8 @@ class VehicleStatusModel {
           last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           status VARCHAR(20) DEFAULT 'live',
           route_id VARCHAR(50),
+          route_index INTEGER DEFAULT -1,
+          next_stop_id VARCHAR(50),
           driver_name VARCHAR(100),
           accuracy DECIMAL(6, 2),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -49,9 +69,20 @@ class VehicleStatusModel {
 
         CREATE INDEX IF NOT EXISTS idx_vehicle_status_last_updated ON vehicle_status(last_updated);
         CREATE INDEX IF NOT EXISTS idx_vehicle_status_status ON vehicle_status(status);
+        CREATE INDEX IF NOT EXISTS idx_vehicle_status_route ON vehicle_status(route_id);
+        CREATE INDEX IF NOT EXISTS idx_vehicle_status_bbox ON vehicle_status(lat, lng);
       `;
       
       await query(sql, []);
+      
+      // Add new columns if they don't exist (migration-safe)
+      try {
+        await query(`ALTER TABLE vehicle_status ADD COLUMN IF NOT EXISTS route_index INTEGER DEFAULT -1`, []);
+        await query(`ALTER TABLE vehicle_status ADD COLUMN IF NOT EXISTS next_stop_id VARCHAR(50)`, []);
+      } catch {
+        // Columns may already exist, that's fine
+      }
+      
       logger.info('Vehicle status table created/verified');
     } catch (error) {
       logger.error('Failed to create vehicle_status table', { error: error.message });
@@ -78,6 +109,7 @@ class VehicleStatusModel {
       } = vehicleData;
 
       if (useInMemory) {
+        const existing = inMemoryVehicles.get(vehicle_id);
         const vehicle = {
           vehicle_id,
           bus_number,
@@ -90,7 +122,7 @@ class VehicleStatusModel {
           driver_name,
           accuracy: parseFloat(accuracy) || null,
           last_updated: new Date().toISOString(),
-          created_at: inMemoryVehicles.has(vehicle_id) ? inMemoryVehicles.get(vehicle_id).created_at : new Date().toISOString(),
+          created_at: existing ? existing.created_at : new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
 
@@ -126,7 +158,8 @@ class VehicleStatusModel {
   }
 
   /**
-   * Get all active vehicles
+   * Get all active vehicles (updated in last 10 minutes).
+   * Status is computed from last_updated, not stored value.
    */
   async getAllActiveVehicles() {
     try {
@@ -135,17 +168,10 @@ class VehicleStatusModel {
         const vehicles = Array.from(inMemoryVehicles.values()).map(vehicle => {
           const lastUpdate = new Date(vehicle.last_updated);
           const secondsSinceUpdate = Math.floor((now - lastUpdate) / 1000);
-          
-          let status = 'live';
-          if (secondsSinceUpdate > 30) {
-            status = 'offline';
-          } else if (secondsSinceUpdate > 10) {
-            status = 'delayed';
-          }
 
           return {
             ...vehicle,
-            status,
+            status: computeStatus(secondsSinceUpdate),
             seconds_since_update: secondsSinceUpdate
           };
         });
@@ -156,17 +182,9 @@ class VehicleStatusModel {
 
       const result = await query(
         `SELECT 
-           vehicle_id,
-           bus_number,
-           lat,
-           lng,
-           speed,
-           heading,
-           last_updated,
-           status,
-           route_id,
-           driver_name,
-           accuracy,
+           vehicle_id, bus_number, lat, lng, speed, heading,
+           last_updated, status, route_id, route_index, next_stop_id,
+           driver_name, accuracy,
            EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_updated)) as seconds_since_update
          FROM vehicle_status 
          WHERE last_updated > CURRENT_TIMESTAMP - INTERVAL '10 minutes'
@@ -174,27 +192,110 @@ class VehicleStatusModel {
         []
       );
 
-      // Update status based on last update time
-      const vehicles = result.rows.map(vehicle => {
-        const secondsSinceUpdate = vehicle.seconds_since_update;
-        let status = 'live';
-        
-        if (secondsSinceUpdate > 30) {
-          status = 'offline';
-        } else if (secondsSinceUpdate > 10) {
-          status = 'delayed';
-        }
-
-        return {
-          ...vehicle,
-          status,
-          seconds_since_update: Math.floor(secondsSinceUpdate)
-        };
-      });
-
-      return vehicles;
+      // Compute status from last_updated time
+      return result.rows.map(vehicle => ({
+        ...vehicle,
+        status: computeStatus(vehicle.seconds_since_update),
+        seconds_since_update: Math.floor(vehicle.seconds_since_update)
+      }));
     } catch (error) {
       logger.error('Error getting active vehicles', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Get vehicles within a bounding box (viewport API).
+   * @param {number} minLat
+   * @param {number} minLng
+   * @param {number} maxLat
+   * @param {number} maxLng
+   * @returns {Promise<Array>}
+   */
+  async getVehiclesInBBox(minLat, minLng, maxLat, maxLng) {
+    try {
+      if (useInMemory) {
+        const now = new Date();
+        return Array.from(inMemoryVehicles.values())
+          .filter(v => {
+            const lat = parseFloat(v.lat);
+            const lng = parseFloat(v.lng);
+            const lastUpdate = new Date(v.last_updated);
+            const secSince = Math.floor((now - lastUpdate) / 1000);
+            return (
+              lat >= minLat && lat <= maxLat &&
+              lng >= minLng && lng <= maxLng &&
+              secSince < 600
+            );
+          })
+          .map(v => {
+            const secSince = Math.floor((new Date() - new Date(v.last_updated)) / 1000);
+            return { ...v, status: computeStatus(secSince), seconds_since_update: secSince };
+          });
+      }
+
+      const result = await query(
+        `SELECT 
+           vehicle_id, bus_number, lat, lng, speed, heading,
+           last_updated, status, route_id, route_index, next_stop_id,
+           driver_name, accuracy,
+           EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_updated)) as seconds_since_update
+         FROM vehicle_status 
+         WHERE lat >= $1 AND lat <= $3
+           AND lng >= $2 AND lng <= $4
+           AND last_updated > CURRENT_TIMESTAMP - INTERVAL '10 minutes'
+         ORDER BY last_updated DESC`,
+        [minLat, minLng, maxLat, maxLng]
+      );
+
+      return result.rows.map(vehicle => ({
+        ...vehicle,
+        status: computeStatus(vehicle.seconds_since_update),
+        seconds_since_update: Math.floor(vehicle.seconds_since_update)
+      }));
+    } catch (error) {
+      logger.error('Error getting vehicles in bbox', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Get all vehicles assigned to a specific route.
+   * @param {string} routeId
+   * @returns {Promise<Array>}
+   */
+  async getVehiclesByRoute(routeId) {
+    try {
+      if (useInMemory) {
+        const now = new Date();
+        return Array.from(inMemoryVehicles.values())
+          .filter(v => v.route_id === routeId)
+          .map(v => {
+            const secSince = Math.floor((now - new Date(v.last_updated)) / 1000);
+            return { ...v, status: computeStatus(secSince), seconds_since_update: secSince };
+          });
+      }
+
+      const result = await query(
+        `SELECT 
+           vehicle_id, bus_number, lat, lng, speed, heading,
+           last_updated, status, route_id, route_index, next_stop_id,
+           driver_name, accuracy,
+           EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_updated)) as seconds_since_update
+         FROM vehicle_status 
+         WHERE route_id = $1
+           AND last_updated > CURRENT_TIMESTAMP - INTERVAL '10 minutes'
+         ORDER BY last_updated DESC`,
+        [routeId]
+      );
+
+      return result.rows.map(vehicle => ({
+        ...vehicle,
+        status: computeStatus(vehicle.seconds_since_update),
+        seconds_since_update: Math.floor(vehicle.seconds_since_update)
+      }));
+    } catch (error) {
+      logger.error('Error getting vehicles by route', { error: error.message, routeId });
       throw error;
     }
   }
@@ -211,58 +312,32 @@ class VehicleStatusModel {
         const now = new Date();
         const lastUpdate = new Date(vehicle.last_updated);
         const secondsSinceUpdate = Math.floor((now - lastUpdate) / 1000);
-        
-        let status = 'live';
-        if (secondsSinceUpdate > 30) {
-          status = 'offline';
-        } else if (secondsSinceUpdate > 10) {
-          status = 'delayed';
-        }
 
         return {
           ...vehicle,
-          status,
+          status: computeStatus(secondsSinceUpdate),
           seconds_since_update: secondsSinceUpdate
         };
       }
 
       const result = await query(
         `SELECT 
-           vehicle_id,
-           bus_number,
-           lat,
-           lng,
-           speed,
-           heading,
-           last_updated,
-           status,
-           route_id,
-           driver_name,
-           accuracy,
+           vehicle_id, bus_number, lat, lng, speed, heading,
+           last_updated, status, route_id, route_index, next_stop_id,
+           driver_name, accuracy,
            EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_updated)) as seconds_since_update
          FROM vehicle_status 
          WHERE vehicle_id = $1`,
         [vehicleId]
       );
 
-      if (result.rows.length === 0) {
-        return null;
-      }
+      if (result.rows.length === 0) return null;
 
       const vehicle = result.rows[0];
-      const secondsSinceUpdate = vehicle.seconds_since_update;
-      let status = 'live';
-      
-      if (secondsSinceUpdate > 30) {
-        status = 'offline';
-      } else if (secondsSinceUpdate > 10) {
-        status = 'delayed';
-      }
-
       return {
         ...vehicle,
-        status,
-        seconds_since_update: Math.floor(secondsSinceUpdate)
+        status: computeStatus(vehicle.seconds_since_update),
+        seconds_since_update: Math.floor(vehicle.seconds_since_update)
       };
     } catch (error) {
       logger.error('Error getting vehicle', { error: error.message, vehicleId });
@@ -325,4 +400,6 @@ vehicleStatusModel.initialize().catch(err => {
   logger.error('Failed to initialize vehicle status model', { error: err.message });
 });
 
+// Export both the model and the computeStatus helper
 module.exports = vehicleStatusModel;
+module.exports.computeStatus = computeStatus;

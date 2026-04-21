@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Driver GPS Tracker - TransitPulse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth-guard.js"></script>
   <style>
     * {
       margin: 0;
@@ -265,7 +269,7 @@
     }
   </style>
 </head>
-<body>
+<body data-allowed-roles="driver,admin">
   <div class="container">
     <div class="header">
       <h1>🚌 Driver GPS Tracker</h1>

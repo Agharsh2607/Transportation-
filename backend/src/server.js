@@ -16,6 +16,7 @@ const routeService = require('./services/route.service');
 const createSimulationRoutes = require('./api/routes/simulation.routes');
 const gtfsLoader = require('./services/gtfs.loader');
 const IndiaBusSimulator = require('./services/india.bus.simulator');
+const stateEngine = require('./services/stateEngine.service');
 
 // Create HTTP server from Express app
 const server = http.createServer(app);
@@ -73,6 +74,12 @@ server.listen(PORT, () => {
   logger.info(`Transit backend listening on port ${PORT}`);
   logger.info(`WebSocket server ready on ws://localhost:${PORT}`);
   logger.info(`Health check: http://localhost:${PORT}/health`);
+  logger.info(`Metrics: http://localhost:${PORT}/api/system/metrics`);
+  logger.info(`Ingest: POST http://localhost:${PORT}/api/ingest/location`);
+
+  // Start the vehicle state engine
+  stateEngine.start();
+  logger.info('Vehicle state engine started');
 });
 
 // ─── Graceful Shutdown ────────────────────────────────────────────────────────
@@ -86,6 +93,9 @@ async function shutdown(signal) {
 
     // Stop queue consumer
     queueService.stopConsumer();
+
+    // Stop state engine
+    stateEngine.stop();
 
     // Close WebSocket server
     wss.close(() => {
